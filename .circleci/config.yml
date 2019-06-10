@@ -3,8 +3,6 @@ jobs:
   build:
     machine:
       enabled: true
-      java:
-        version: 'oraclejdk8'
     working_directory: ~
     steps:
       - checkout
@@ -15,7 +13,7 @@ jobs:
     working_directory: ~
     steps:
       - checkout
-      - run: ./gradlew shadowJar --stacktrace
+      - run: ./gradlew shadowJar --stacktrace -Dorg.gradle.java.home=/usr/lib/jvm/java-8-openjdk-amd64
 workflows:
   version: 2
   build:
