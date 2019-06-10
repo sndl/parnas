@@ -3,8 +3,8 @@ jobs:
   build:
     machine:
       enabled: true
-      environment:
-        JAVA_HOME: /usr/lib/jvm/java-8-openjdk
+      java:
+        version: 'oraclejdk8'
     working_directory: ~
     steps:
       - checkout
