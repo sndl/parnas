@@ -10,7 +10,7 @@ import java.util.UUID.randomUUID
 class TomlBackendTest {
     companion object {
         private val backend
-            get() = Toml("toml-test", "./toml-test/${randomUUID()}.toml").also {
+            get() = Toml("toml-test", "/tmp/parnas-toml/${randomUUID()}.toml").also {
                 it.initialize()
                 it["FIRST_ENTRY"] = "first-entry"
                 it["SECOND_ENTRY"] = "second-entry"
@@ -22,13 +22,13 @@ class TomlBackendTest {
         @JvmStatic
         @BeforeAll
         fun createTestDirectory() {
-            File("./toml-test").mkdir()
+            File("/tmp/parnas-toml").mkdir()
         }
 
         @JvmStatic
         @AfterAll
         fun cleanupTestBackend() {
-            FileUtils.deleteDirectory(File("./toml-test/"))
+            FileUtils.deleteDirectory(File("/tmp/parnas-toml/"))
         }
     }
 

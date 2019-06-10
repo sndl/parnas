@@ -7,7 +7,7 @@ import java.io.File
 
 class KeePassBackendTest {
     private val backend
-        get() = KeePass("keepass-test", "keepass-test.kdbx", "test1234").also {
+        get() = KeePass("keepass-test", "/tmp/parnas-keepass.kdbx", "test1234").also {
             it.initialize()
             it["FIRST_ENTRY"] = "first-entry"
             it["SECOND_ENTRY"] = "second-entry"
@@ -96,6 +96,6 @@ class KeePassBackendTest {
 
     @AfterEach
     fun cleanupTestBackend() {
-        File("keepass-test.kdbx").delete()
+        File("/tmp/parnas-keepass.kdbx").delete()
     }
 }

@@ -7,7 +7,7 @@ import java.io.File
 
 class PlainBackendTest {
     private val backend
-        get() = Plain("plain-test", "plain-test.properties").also {
+        get() = Plain("plain-test", "/tmp/parnas-plain.properties").also {
             it.initialize()
             it["FIRST_ENTRY"] = "first-entry"
             it["SECOND_ENTRY"] = "second-entry"
@@ -96,6 +96,6 @@ class PlainBackendTest {
 
     @AfterEach
     fun cleanupTestBackend() {
-        File("plain-test.properties").delete()
+        File("/tmp/parnas-plain.properties").delete()
     }
 }
