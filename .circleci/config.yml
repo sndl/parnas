@@ -1,13 +1,12 @@
 version: 2
 jobs:
   build:
-    machine:
-      enabled: true
-      java:
-        version: 'oraclejdk8'
+    docker:
+      - image: circleci/openjdk:8-jdk
     working_directory: ~
     steps:
       - checkout
+      - setup_remote_docker
       - run: ./gradlew build
   release:
     machine:
