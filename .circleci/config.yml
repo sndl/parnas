@@ -13,7 +13,7 @@ jobs:
     working_directory: ~
     steps:
       - checkout
-      - run: ./gradlew shadowJar
+      - run: ./gradlew shadowJar --stacktrace
 workflows:
   version: 2
   build:

@@ -1,4 +1,6 @@
-# Parameter Manager
+# Parnas
+
+[![CircleCI](https://circleci.com/gh/sndl/parnas.svg?style=svg)](https://circleci.com/gh/sndl/parnas)
 
 Parameter Manager is a tool to manage configuration parameters stored in different backends.
 The tool can be extended with additional backends and outputs.
