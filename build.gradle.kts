@@ -67,6 +67,7 @@ val shadowJar = shadowJar {
 githubRelease {
     token(System.getenv("GITHUB_TOKEN"))
     overwrite(true)
+    owner("sndl")
     releaseAssets(shadowJar.task.archiveFile.get())
 }
 
