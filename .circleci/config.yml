@@ -1,19 +1,28 @@
-version: 2
-jobs:
-  build:
+version: 2.1
+
+executors:
+  default:
     machine:
       enabled: true
     working_directory: ~
+
+jobs:
+  build:
+    executor: default
     steps:
       - checkout
       - run: ./gradlew build --stacktrace -Dorg.gradle.java.home=/usr/lib/jvm/java-8-openjdk-amd64
+      - persist_to_workspace:
+          root: ~
+          paths:
+            - build
   release:
-    machine:
-      enabled: true
-    working_directory: ~
+    executor: default
     steps:
       - checkout
-      - run: ./gradlew githubRelease -Dorg.gradle.java.home=/usr/lib/jvm/java-8-openjdk-amd64
+      - attach_workspace:
+          at: build
+      - run: ./gradlew --stacktrace githubRelease -Dorg.gradle.java.home=/usr/lib/jvm/java-8-openjdk-amd64
 workflows:
   version: 2
   build-test-and-release:
