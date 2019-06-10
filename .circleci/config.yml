@@ -13,13 +13,10 @@ jobs:
     working_directory: ~
     steps:
       - checkout
-      - run: ./gradlew shadowJar --stacktrace -Dorg.gradle.java.home=/usr/lib/jvm/java-8-openjdk-amd64
+      - run: ./gradlew githubRelease -Dorg.gradle.java.home=/usr/lib/jvm/java-8-openjdk-amd64
 workflows:
   version: 2
-  build:
-    jobs:
-      - build
-  release:
+  build-test-and-release:
     jobs:
       - build
       - approve-release:
