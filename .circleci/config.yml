@@ -3,6 +3,8 @@ jobs:
   build:
     machine:
       enabled: true
+      environment:
+        JAVA_HOME: /usr/lib/jvm/java-8-openjdk
     working_directory: ~
     steps:
       - checkout
