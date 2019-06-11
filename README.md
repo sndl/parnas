@@ -49,7 +49,8 @@ Example:
     type = keepass
     path = keepass1.kdbx
     password = somepassword # If not set app will try to read password from PARNAS_KEEPASS1_PASSWORD
-                            # If env variable is not set, it will try to read contents from file named .parnas_keepass1_password
+                            # If env variable is not set, it will try to read file name from "password-from-file" and then read file contents
+                            # If "password-from-file" is not set, it will try to read contents from file named .parnas_keepass1_password
                             # If file does not exist, it will prompt for password
 
 [ssm1]

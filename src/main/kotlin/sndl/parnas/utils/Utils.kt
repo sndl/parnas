@@ -24,6 +24,7 @@ fun getConfigParameter(parameterName: String, backendConfig: Map<String, String>
     return if (fallback) {
         backendConfig[parameterName]
                 ?: System.getenv("PARNAS_${backendConfig.getValue("name").toUpperCase()}_${parameterName.toUpperCase()}")
+                ?: backendConfig["$parameterName-from-file"]?.let { getFileContentOrNull(it) }
                 ?: getFileContentOrNull(".parnas_${backendConfig.getValue("name")}_$parameterName")
                 ?: System.console()
                         .readPassword("Please enter value for backend \"${backendConfig["name"]}\" parameter \"$parameterName\": ")
