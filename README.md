@@ -2,8 +2,15 @@
 
 [![CircleCI](https://circleci.com/gh/sndl/parnas.svg?style=svg)](https://circleci.com/gh/sndl/parnas)
 
-Parameter Manager is a tool to manage configuration parameters stored in different backends.
+Parnas is a tool to manage configuration parameters stored in different backends.
 The tool can be extended with additional backends and outputs.
+
+## Installation
+
+The easiest way to get and start using Parnas is to download wrapper script, that will check and get fresh versions for you.
+Prerequisites for this script are: `java curl jq`
+
+Command to get the wrapper: `curl -s 'https://raw.githubusercontent.com/sndl/parnas/master/parnas.sh' > /usr/local/bin/parnas && chmod +x /usr/local/bin/parnas`
 
 ## Configuration
 
@@ -51,17 +58,17 @@ Example:
 
 Usage examples are based on example config above.
 
-1. Help: `java -jar parnas.jar --help`
-1. List all parameters: `java -jar parnas.jar local1 list`
-1. List all parameters by prefix: `java -jar parnas.jar local1 list --prefix param`
-1. Set a parameter: `java -jar parnas.jar local1 set newParamName newParamValue`
-1. Get a parameter: `java -jar parnas.jar local1 get newParamName`
-1. Remove parameter: `java -jar parnas.jar local1 rm newParamName`
-1. Diff between parameters in two backends: `java -jar parnas.jar local1 diff ssm1`
+1. Help: `parnas --help`
+1. List all parameters: `parnas local1 list`
+1. List all parameters by a prefix: `parnas local1 list --prefix param`
+1. Set a parameter: `parnas local1 set newParamName newParamValue`
+1. Get a parameter: `parnas local1 get newParamName`
+1. Remove parameter: `parnas local1 rm newParamName`
+1. Diff between parameters in two backends: `parnas local1 diff ssm1`
 1. Remove ALL parameters in a backend, must pass `--permit-destroy` flag for command to succeed:
-`java -jar parnas.jar local1 destroy --permit-destroy`
+`parnas local1 destroy --permit-destroy`
 
-Actions can be done on multiple backends by tag: `java -jar parnas.jar --by-tag non-prod set newParamName2 newParamValue2`
+Actions can be done on multiple backends by tag: `parnas --by-tag non-prod set newParamName2 newParamValue2`
 
 ## Backends
 At the moment supported backends are:
@@ -78,11 +85,11 @@ At the moment supported output formats are:
 * Only flat configs are supported for now, i.e. it is not possible to create SSM by-path configs, TOML sections work though
 
 ## Roadmap
-* ~~Config validation~~
-* ~~Sync parameters from one backend to another~~
-* ~~Secure config file or think about providing credentials in a different way~~
-* ~~Support tags and add ability to set parameters to multiple backends simultaneously~~
-* ~~Use GraalVM to build executable~~
+* ~~Config validation~~ (Implemented)
+* ~~Sync parameters from one backend to another~~ (Implemented)
+* ~~Secure config file or think about providing credentials a different way~~ (Implemented)
+* ~~Support tags and add ability to set parameters to multiple backends simultaneously~~ (Implemented)
+* ~~Use GraalVM to build executable~~ (Not Implemented: due to problems with reflection)
 * Add Consul backend
 * Add JSON output
 * Add daemon mode and thin client in order to reuse SSM or any other remote storage connections
