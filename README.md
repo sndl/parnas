@@ -8,9 +8,14 @@ The tool can be extended with additional backends and outputs.
 ## Installation
 
 The easiest way to get and start using Parnas is to download wrapper script, that will check and get fresh versions for you.
-Prerequisites for this script are: `java curl jq`
+Prerequisites for this script are: `java curl jq grep`
 
-Command to get the wrapper: `curl -s 'https://raw.githubusercontent.com/sndl/parnas/master/parnas.sh' > /usr/local/bin/parnas && chmod +x /usr/local/bin/parnas`
+Commands to install the wrapper: 
+```
+curl -s 'https://raw.githubusercontent.com/sndl/parnas/master/install.sh -o ./install.sh'
+chmod +x install.sh && ./install.sh && rm ./install.sh
+```
+Restart your terminal, and you should be able to use `parnas` from the command line
 
 ## Configuration
 
