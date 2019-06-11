@@ -1,6 +1,7 @@
 # Parnas
 
 [![CircleCI](https://circleci.com/gh/sndl/parnas.svg?style=svg)](https://circleci.com/gh/sndl/parnas)
+[![TAG](https://img.shields.io/github/tag/sndl/parnas.svg)](https://github.com/sndl/parnas/tags)
 
 Parnas is a tool to manage configuration parameters stored in different backends.
 The tool can be extended with additional backends and outputs.
