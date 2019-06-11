@@ -57,7 +57,7 @@ set_path () {
 
 main () {
     download_wrapper
-    set_path
+    check_path
 }
 
 main
