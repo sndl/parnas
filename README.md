@@ -48,7 +48,8 @@ Example:
     type = keepass
     path = keepass1.kdbx
     password = somepassword # If not set app will try to read password from PARNAS_KEEPASS1_PASSWORD
-                            # If env variable is not set, it will prompt for password
+                            # If env variable is not set, it will try to read contents from file named .parnas_keepass1_password
+                            # If file does not exist, it will prompt for password
 
 [ssm1]
     tags = prod
@@ -98,3 +99,6 @@ At the moment supported output formats are:
 * Add Consul backend
 * Add JSON output
 * Add daemon mode and thin client in order to reuse SSM or any other remote storage connections
+
+--------
+[Changelog](CHANGELOG.md)
