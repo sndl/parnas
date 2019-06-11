@@ -12,7 +12,7 @@ Prerequisites for this script are: `java curl jq grep`
 
 Commands to install the wrapper: 
 ```
-curl -s 'https://raw.githubusercontent.com/sndl/parnas/master/install.sh -o ./install.sh'
+curl -s 'https://raw.githubusercontent.com/sndl/parnas/master/install.sh' -o ./install.sh
 chmod +x install.sh && ./install.sh && rm ./install.sh
 ```
 Restart your terminal, and you should be able to use `parnas` from the command line
