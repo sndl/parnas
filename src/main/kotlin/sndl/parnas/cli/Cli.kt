@@ -15,7 +15,7 @@ import sndl.parnas.utils.*
 import java.io.File
 import kotlin.system.exitProcess
 
-class Cli : CliktCommand(help = "This is a command line tool that helps to manage configuration parameters in different backends") {
+class Cli : CliktCommand(name= "parnas", help = "This is a command line tool that helps to manage configuration parameters in different backends") {
     private val backendIdentifier: String by argument("BACKEND|TAG")
     private val configFile: File by option("-c", "--config",
             help = "Path to config file").file().default(File("parnas.conf"))
