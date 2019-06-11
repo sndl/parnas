@@ -29,7 +29,7 @@ check_for_updates () {
     local jar_name=${PARNAS_HOME}/${APP_NAME}.jar
 
     if [[ ${cur_ver} == "" || ${cur_ver} != ${latest_ver} || ! -f ${jar_name} ]]; then
-        echo "New version of ${APP_NAME} is available. Would you like to update? (yes/no):"
+        echo "New version of ${APP_NAME} is available - ${latest_ver}. Would you like to update? (yes/no):"
 
         read confirmation
         if [[ ${confirmation} == "yes" ]]; then
@@ -51,9 +51,9 @@ main () {
     check_prerequisites
     check_config
     check_for_updates
-    execute
+    execute "$@"
 }
 
-main
+main "$@"
 
 exit 0
