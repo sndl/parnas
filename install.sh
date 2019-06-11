@@ -13,8 +13,7 @@ download_wrapper () {
 }
 
 check_path () {
-    echo $PATH | grep ${BIN_PATH}
-    if [[ $? == 1 ]]; then
+    if [[ $(echo $PATH | grep ${BIN_PATH}) == "" ]]; then
         echo "Looks like $BIN_PATH is not in path. Would you like to set it automatically? (yes/no):"
 
         read confirmation
