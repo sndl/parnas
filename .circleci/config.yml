@@ -7,6 +7,8 @@ jobs:
     steps:
       - checkout
       - run: ./gradlew build --stacktrace -Dorg.gradle.java.home=/usr/lib/jvm/java-8-openjdk-amd64
+      - store_test_results:
+          path: build/parnas/test-results
   release:
     machine:
       enabled: true
