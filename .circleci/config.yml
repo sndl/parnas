@@ -14,6 +14,7 @@ jobs:
     steps:
       - checkout
       - run: ./gradlew githubRelease -Dorg.gradle.java.home=/usr/lib/jvm/java-8-openjdk-amd64
+
 workflows:
   version: 2
   build-test-and-release:
@@ -23,6 +24,12 @@ workflows:
           type: approval
           requires:
             - build
+          filters:
+            branches:
+              only: master
       - release:
           requires:
             - approve-release
+          filters:
+            branches:
+              only: master
