@@ -37,6 +37,7 @@ class SSMTest {
         get() = SSM("ssm-test", ssmClient, "/${randomUUID()}/", "1111").also {
             it["FIRST_ENTRY"] = "first-entry"
             it["SECOND_ENTRY"] = "second-entry"
+            it["ENTRY_PREFIX/THIRD_ENTRY"] = "third-entry"
         }
 
     @Test
@@ -54,8 +55,11 @@ class SSMTest {
         val list = backend.list()
         val expectedList = setOf(
                 ConfigOption("FIRST_ENTRY", "first-entry"),
-                ConfigOption("SECOND_ENTRY", "second-entry")
+                ConfigOption("SECOND_ENTRY", "second-entry"),
+                ConfigOption("ENTRY_PREFIX/THIRD_ENTRY", "third-entry")
         )
+
+        println(list)
 
         Assertions.assertEquals(expectedList, list)
     }

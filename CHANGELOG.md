@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.3
+
+* `list` command on SSM backend now returns all parameters with recursive call
+
 ## 0.1.2
 
 * Add fallback to password from a file for Keepass backend. Filename can now be specified in config as `password-from-file`

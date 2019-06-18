@@ -48,6 +48,7 @@ class SSM(name: String, private val ssmClient: AWSSimpleSystemsManagement,
     override fun list() = buildSet<ConfigOption> {
         val request = GetParametersByPathRequest()
                 .withPath(prefix)
+                .withRecursive(true)
                 .withWithDecryption(true)
 
         do {
