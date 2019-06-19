@@ -9,10 +9,10 @@ import sndl.parnas.backend.ConfigOption
 import sndl.parnas.utils.*
 
 class SSM(name: String, private val ssmClient: AWSSimpleSystemsManagement,
-          private var prefix: String, private val keyId: String) : Backend(name) {
+          var prefix: String, private val keyId: String, private val separatorToReplace: String? = null) : Backend(name) {
 
     constructor(name: String, region: String?, profileName: String?,
-                prefix: String, keyId: String) :
+                prefix: String, keyId: String, separatorToReplace: String? = null) :
             this(
                     name = name,
                     ssmClient = AWSSimpleSystemsManagementClientBuilder.standard()
@@ -20,7 +20,8 @@ class SSM(name: String, private val ssmClient: AWSSimpleSystemsManagement,
                             .withCredentials(ProfileCredentialsProvider(profileName))
                             .build(),
                     prefix = prefix,
-                    keyId = keyId
+                    keyId = keyId,
+                    separatorToReplace = separatorToReplace
             )
 
     constructor(name: String, config: Map<String, String>) :
@@ -29,7 +30,8 @@ class SSM(name: String, private val ssmClient: AWSSimpleSystemsManagement,
                     region = getConfigParameter("region", config),
                     profileName = getConfigParameter("profile", config),
                     prefix = getConfigParameter("prefix", config),
-                    keyId = getConfigParameter("kms-key-id", config, true)
+                    keyId = getConfigParameter("kms-key-id", config, true),
+                    separatorToReplace = config["separator-to-replace"]
             )
 
     override val isInitialized: Boolean = true
@@ -56,7 +58,7 @@ class SSM(name: String, private val ssmClient: AWSSimpleSystemsManagement,
             val nextToken = result.nextToken
 
             result.parameters.forEach {
-                add(ConfigOption(it.name.removePrefix(prefix), it.value))
+                add(ConfigOption(it.name.removePrefix(prefix).convertFromSSMFormat(), it.value))
             }
 
             request.nextToken = nextToken
@@ -64,7 +66,7 @@ class SSM(name: String, private val ssmClient: AWSSimpleSystemsManagement,
     }
 
     override fun get(key: String): ConfigOption? {
-        val fullKey = prefix + key
+        val fullKey = prefix + key.convertToSSMFormat()
         val request = GetParameterRequest()
                 .withName(fullKey)
                 .withWithDecryption(true)
@@ -77,7 +79,7 @@ class SSM(name: String, private val ssmClient: AWSSimpleSystemsManagement,
     }
 
     override fun set(key: String, value: String): ConfigOption {
-        val fullKey = prefix + key
+        val fullKey = prefix + key.convertToSSMFormat()
         val request = PutParameterRequest()
                 .withName(fullKey)
                 .withValue(value)
@@ -91,7 +93,7 @@ class SSM(name: String, private val ssmClient: AWSSimpleSystemsManagement,
     }
 
     override fun delete(key: String) {
-        val fullKey = prefix + key
+        val fullKey = prefix + key.convertToSSMFormat()
         val request = DeleteParameterRequest()
                 .withName(fullKey)
 
@@ -101,4 +103,12 @@ class SSM(name: String, private val ssmClient: AWSSimpleSystemsManagement,
             System.err.println("ERROR: Parameter Not Found - \"$key\"")
         }
     }
+
+    private fun String.convertToSSMFormat() = separatorToReplace?.let {
+        this.replace(separatorToReplace, "/")
+    } ?: this
+
+    private fun String.convertFromSSMFormat() = separatorToReplace?.let {
+        this.replace("/", separatorToReplace)
+    } ?: this
 }

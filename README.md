@@ -62,6 +62,7 @@ Example:
     profile = sandbox
     prefix = /sndl/parnas/test
     kms-key-id = 111a1aa1-a11a-1a1a-1aa1-1111111111a1
+    separator-to-replace = . # Can be absent, if set then all "." in uploaded keys will be replaced with "/"
 ```
 
 ## Usage
