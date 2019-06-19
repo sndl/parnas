@@ -6,7 +6,7 @@
 Parnas is a tool to manage configuration parameters stored in different backends.
 The tool can be extended with additional backends and outputs.
 
-![GIPHY](https://media.giphy.com/media/WryP8X3pfFkMR3gacz/giphy.webp)
+![GIPHY](https://media.giphy.com/media/WryP8X3pfFkMR3gacz/giphy.gif)
 
 ## Installation
 
