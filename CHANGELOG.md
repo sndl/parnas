@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.5
+* Fix wrapper issue with update prompt when it could not connect to GitHub
+* Require --force flag when using `update-from` command
+
 ## 0.1.4
 
 * SSM Backend now supports automatic separator replacement with `separator-to-replace` option.
