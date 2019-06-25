@@ -186,6 +186,8 @@ class UpdateParamFrom : Command(
         |with parameters from another backend.""".trimMargin()) {
 
     private val fromBackend: String by argument("<from-backend>")
+    private val force: Boolean by option("-f", "--force",
+            help = "Overwrites all existing parameters if this flag is applied").flag(default = false)
 
     override fun run() {
         val otherBackend = config.getBackend(fromBackend)
