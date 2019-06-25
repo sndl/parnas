@@ -28,6 +28,11 @@ check_for_updates () {
     local latest_ver=$(echo ${LATEST_BUILD_INFO} | jq -r '.name')
     local jar_name=${PARNAS_HOME}/${APP_NAME}.jar
 
+    if [[ ${latest_ver} == "" ]]; then
+        echo "WARNING: Couldn't connect to GitHub to check for updates."
+        return
+    fi
+
     if [[ ${cur_ver} == "" || ${cur_ver} != ${latest_ver} || ! -f ${jar_name} ]]; then
         echo "New version of ${APP_NAME} is available - ${latest_ver}. Would you like to update? (yes/no):"
 
