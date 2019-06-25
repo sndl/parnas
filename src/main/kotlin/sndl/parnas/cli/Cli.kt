@@ -192,6 +192,10 @@ class UpdateParamFrom : Command(
     override fun run() {
         val otherBackend = config.getBackend(fromBackend)
 
+        require(force) {
+            exitProcessWithMessage(1, "ERROR: \"--force\" flag is required, because this command could overwrite existing parameters")
+        }
+
         backends.forEach {
             if (!it.isInitialized) exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
 
