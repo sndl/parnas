@@ -3,6 +3,7 @@
 ## 0.1.5
 * Fix wrapper issue with update prompt when it could not connect to GitHub
 * Require --force flag when using `update-from` command
+* CLI Refactoring
 
 ## 0.1.4
 

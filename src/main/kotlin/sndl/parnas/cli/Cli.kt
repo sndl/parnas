@@ -15,7 +15,7 @@ import sndl.parnas.utils.*
 import java.io.File
 import kotlin.system.exitProcess
 
-class Cli : CliktCommand(name= "parnas", help = "This is a command line tool that helps to manage configuration parameters in different backends") {
+class Cli : CliktCommand(name = "parnas", help = "This is a command line tool that helps to manage configuration parameters in different backends") {
     private val backendIdentifier: String by argument("BACKEND|TAG")
     private val configFile: File by option("-c", "--config",
             help = "Path to config file").file().default(File("parnas.conf"))
@@ -87,16 +87,16 @@ class SetParam : Command("set", "Set specific value for a specific key, use --va
         }
 
         backends.forEach {
-            if (!it.isInitialized) {
+            require(it.isInitialized) {
                 exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
             }
 
             val oldValue = it[key]?.value
-            if (oldValue != null && !force) {
-                exitProcessWithMessage(1, "ERROR: will not overwrite a parameter unless \"--force\" flag is applied")
-            } else {
-                output.printSet(it.set(key, value!!), oldValue, it)
+
+            if (oldValue != null) {
+                require(force) { exitProcessWithMessage(1, "ERROR: will not overwrite a parameter unless \"--force\" flag is applied") }
             }
+            output.printSet(it.set(key, value!!), oldValue, it)
         }
     }
 }
@@ -107,7 +107,9 @@ class RmParam : Command("rm", "Remove parameter by key") {
     override fun run() {
         // TODO@sndl: return ConfigOption from delete method
         backends.forEach {
-            if (!it.isInitialized) exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
+            require(it.isInitialized) {
+                exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
+            }
 
             val oldValue = it[key]?.value
             it.delete(key)
@@ -122,7 +124,9 @@ class ListParam : Command("list", "List all parameters") {
     override fun run() {
         if (prefix == null) {
             backends.forEach {
-                if (!it.isInitialized) exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
+                require(it.isInitialized) {
+                    exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
+                }
                 output.printList(it.list(), prefix, it)
             }
         } else {
@@ -144,7 +148,9 @@ class DiffParam : Command(
     override fun run() {
         val otherBackend = config.getBackend(otherBackendName)
         backends.forEach {
-            if (!it.isInitialized) exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
+            require(it.isInitialized) {
+                exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
+            }
 
             output.printDiff(it.diff(otherBackend, prefix.toStringOrEmpty()), prefix, it, otherBackend)
         }
@@ -164,7 +170,9 @@ class DestroyParam : Command(
 
     override fun run() {
         backends.forEach {
-            if (!it.isInitialized) exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
+            require(it.isInitialized) {
+                exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
+            }
 
             it.permitDestroy = permitDestroy
 
@@ -197,7 +205,9 @@ class UpdateParamFrom : Command(
         }
 
         backends.forEach {
-            if (!it.isInitialized) exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
+            require(it.isInitialized) {
+                exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
+            }
 
             val oldParams = it.list()
             val updatedParams = it.updateFrom(otherBackend)
