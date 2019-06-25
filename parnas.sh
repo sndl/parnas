@@ -3,6 +3,7 @@
 APP_NAME=Parnas
 
 LATEST_BUILD_INFO=$(curl -s https://api.github.com/repos/sndl/parnas/releases/latest)
+CHANGELOG_URL='https://github.com/sndl/parnas/blob/master/CHANGELOG.md'
 PARNAS_HOME=$HOME/.local/share/parnas
 
 check_prerequisites () {
@@ -34,7 +35,9 @@ check_for_updates () {
     fi
 
     if [[ ${cur_ver} == "" || ${cur_ver} != ${latest_ver} || ! -f ${jar_name} ]]; then
-        echo "New version of ${APP_NAME} is available - ${latest_ver}. Would you like to update? (yes/no):"
+        echo "New version of ${APP_NAME} is available - ${latest_ver}"
+        echo "CHANGELOG: $CHANGELOG_URL"
+        echo "Would you like to update? (yes/no):"
 
         read confirmation
         if [[ ${confirmation} == "yes" ]]; then
