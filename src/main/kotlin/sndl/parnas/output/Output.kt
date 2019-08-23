@@ -94,14 +94,14 @@ class PrettyOutput : Output() {
         backendParams.forEach {
             val spacing = longestKey - it.key.length + 1
 
-            echo("${style.green("+")} ${decorateKey(it.key)}${" ".repeat(spacing)}= " +
+            echo("${style.red("-")} ${decorateKey(it.key)}${" ".repeat(spacing)}= " +
                     decorateValue(it.value))
         }
 
         otherBackendParams.forEach {
             val spacing = longestKey - it.key.length + 1
 
-            echo("${style.red("-")} ${decorateKey(it.key)}${" ".repeat(spacing)}= " +
+            echo("${style.green("+")} ${decorateKey(it.key)}${" ".repeat(spacing)}= " +
                     decorateValue(it.value))
         }
     }
