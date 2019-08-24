@@ -1,10 +1,10 @@
 package sndl.parnas.backend.impl
 
+import nu.studer.java.util.OrderedProperties
 import sndl.parnas.backend.Backend
 import sndl.parnas.backend.ConfigOption
 import sndl.parnas.utils.*
 import java.io.File
-import java.util.*
 
 class Plain(name: String, private val path: String) : Backend(name) {
     constructor(name: String, config: Map<String, String>) :
@@ -12,13 +12,13 @@ class Plain(name: String, private val path: String) : Backend(name) {
 
     private val file = File(path)
 
-    private lateinit var data: Properties
+    private lateinit var data: OrderedProperties
 
     override val isInitialized: Boolean = file.exists()
 
     init {
         if (file.exists()) {
-            data = Properties().apply { load(file.reader()) }
+            data = OrderedProperties().apply { load(file.reader()) }
         }
     }
 
@@ -28,10 +28,10 @@ class Plain(name: String, private val path: String) : Backend(name) {
         }
 
         file.createNewFile()
-        data = Properties().apply { load(file.reader()) }
+        data = OrderedProperties().apply { load(file.reader()) }
     }
 
-    override fun list() = data.map { ConfigOption(it.key.toString(), it.value.toString()) }.toLinkedSet()
+    override fun list() = data.entrySet().map { ConfigOption(it.key.toString(), it.value.toString()) }.toLinkedSet()
 
     override fun get(key: String): ConfigOption? = data.getProperty(key)?.let { ConfigOption(key, it) }
 
@@ -43,7 +43,7 @@ class Plain(name: String, private val path: String) : Backend(name) {
     }
 
     override fun delete(key: String) {
-        data.remove(key)
+        data.removeProperty(key)
         data.store(file.outputStream(), null)
     }
 }

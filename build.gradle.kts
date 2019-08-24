@@ -23,6 +23,7 @@ dependencies {
     compile("com.amazonaws", "aws-java-sdk-ssm", "1.11.555")
     compile("com.electronwill.night-config", "toml", "3.5.0")
     compile("com.electronwill.night-config", "core", "3.5.0")
+    compile("nu.studer", "java-ordered-properties", "1.0.2")
 
     compile("com.github.ajalt", "clikt", "1.6.0")
     compile("com.github.ajalt", "mordant", "1.2.0")
