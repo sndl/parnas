@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.1.7
+* Fix performance issue with diff and update-from methods
+
 ## 0.1.6
 * Fix diff display [#8](https://github.com/sndl/parnas/issues/8)
 
