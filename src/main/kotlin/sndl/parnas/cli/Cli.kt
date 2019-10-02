@@ -11,6 +11,7 @@ import sndl.parnas.backend.Backend
 import sndl.parnas.config.Config
 import sndl.parnas.output.Output
 import sndl.parnas.output.PrettyOutput
+import sndl.parnas.output.SilentOutput
 import sndl.parnas.utils.*
 import java.io.File
 import kotlin.system.exitProcess
@@ -20,7 +21,7 @@ class Cli : CliktCommand(name = "parnas", help = "This is a command line tool th
     private val configFile: File by option("-c", "--config",
             help = "Path to config file").file().default(File("parnas.conf"))
     private val outputMethod: String by option("-o", "--output",
-            help = "Select preferred output method").choice("pretty").default("pretty")
+            help = "Select preferred output method").choice("pretty", "silent").default("pretty")
     private val byTag by option("-t", "--by-tag").flag(default = false)
 
     data class ConfigObjects(val backend: LinkedHashSet<Backend>, val output: Output, val config: Config)
@@ -39,6 +40,7 @@ class Cli : CliktCommand(name = "parnas", help = "This is a command line tool th
 
         val output = when (outputMethod) {
             "pretty" -> PrettyOutput()
+            "silent" -> SilentOutput()
             else -> throw ConfigurationException("\"$outputMethod\" output is not supported")
         }
 

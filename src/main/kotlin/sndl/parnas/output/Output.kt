@@ -129,3 +129,49 @@ class PrettyOutput : Output() {
         }
     }
 }
+
+/**
+ * Output for automation purposes, when this output is used no parameters(secrets) are displayed, therefore CI tool won't store it in logs
+ */
+class SilentOutput : Output() {
+    private val warnMessage = "WARNING: Silent output is used, no parameters will be displayed"
+
+    override fun printSet(configOption: ConfigOption, oldValue: String?, backend: Backend) {
+        echo(warnMessage)
+        echo("Parameter set")
+    }
+
+    override fun printRm(key: String, value: String?, backend: Backend) {
+        echo(warnMessage)
+        echo("Parameter removed")
+    }
+
+    override fun printList(configOptions: LinkedHashSet<ConfigOption>, prefix: String?, backend: Backend) {
+        echo(warnMessage)
+        echo("There are ${configOptions.size} parameters")
+    }
+
+    override fun printDestroy(backend: Backend) {
+        echo(warnMessage)
+        echo("Backend was destroyed")
+    }
+
+    override fun printDiff(diff: Pair<LinkedHashSet<ConfigOption>, LinkedHashSet<ConfigOption>>, prefix: String?, backend: Backend, otherBackend: Backend) {
+        echo(warnMessage)
+        echo("Diff does nothing with \"silent\" output mode")
+    }
+
+    override fun printUpdateFrom(oldParams: LinkedHashSet<ConfigOption>, updatedParams: LinkedHashSet<ConfigOption>, backend: Backend, otherBackend: Backend) {
+        echo(warnMessage)
+        echo("Updated ${updatedParams.size} parameters.")
+    }
+
+    override fun printGet(key: String, value: String?, backend: Backend) {
+        echo(warnMessage)
+        echo(if (value == null) {
+            "The parameter doesn't exist"
+        } else {
+            "The parameter exists"
+        })
+    }
+}
