@@ -1,5 +1,7 @@
 package sndl.parnas.backend.impl
 
+import com.amazonaws.auth.AWSCredentialsProviderChain
+import com.amazonaws.auth.EnvironmentVariableCredentialsProvider
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder
@@ -22,7 +24,10 @@ class SSM(name: String, ssmClient: AWSSimpleSystemsManagement,
                     name = name,
                     ssmClient = AWSSimpleSystemsManagementClientBuilder.standard()
                             .withRegion(region)
-                            .withCredentials(ProfileCredentialsProvider(profileName))
+                            .withCredentials(AWSCredentialsProviderChain(
+                                    EnvironmentVariableCredentialsProvider(),
+                                    ProfileCredentialsProvider(profileName)
+                            ))
                             .build(),
                     prefix = prefix,
                     keyId = keyId,
