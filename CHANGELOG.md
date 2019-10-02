@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.8
+* Limit amount of requests to SSM, so it won't throttle the application
+* Support AWS Credentials provider chain, now it is possible to pass AWS credentials via environment variables
+
 ## 0.1.7
 * Fix performance issue with diff and update-from methods
 
