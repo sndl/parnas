@@ -27,7 +27,7 @@ class SSM(name: String, ssmClient: AWSSimpleSystemsManagement,
                             .withRegion(region ?: DefaultAwsRegionProviderChain().region)
                             .withCredentials(AWSCredentialsProviderChain(
                                     EnvironmentVariableCredentialsProvider(),
-                                    profileName?.let { ProfileCredentialsProvider(it) } ?: ProfileCredentialsProvider()
+                                    profileName?.let { ProfileCredentialsProvider(it) }
                             ))
                             .build(),
                     prefix = prefix,
