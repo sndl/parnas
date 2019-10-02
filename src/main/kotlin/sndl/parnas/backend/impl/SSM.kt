@@ -3,6 +3,7 @@ package sndl.parnas.backend.impl
 import com.amazonaws.auth.AWSCredentialsProviderChain
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
+import com.amazonaws.regions.DefaultAwsRegionProviderChain
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder
 import com.amazonaws.services.simplesystemsmanagement.model.*
@@ -23,10 +24,10 @@ class SSM(name: String, ssmClient: AWSSimpleSystemsManagement,
             this(
                     name = name,
                     ssmClient = AWSSimpleSystemsManagementClientBuilder.standard()
-                            .withRegion(region)
+                            .withRegion(region ?: DefaultAwsRegionProviderChain().region)
                             .withCredentials(AWSCredentialsProviderChain(
                                     EnvironmentVariableCredentialsProvider(),
-                                    ProfileCredentialsProvider(profileName)
+                                    profileName?.let { ProfileCredentialsProvider(it) } ?: ProfileCredentialsProvider()
                             ))
                             .build(),
                     prefix = prefix,
@@ -34,11 +35,12 @@ class SSM(name: String, ssmClient: AWSSimpleSystemsManagement,
                     separatorToReplace = separatorToReplace
             )
 
+    // TODO: implement parameter nullability properly
     constructor(name: String, config: Map<String, String>) :
             this(
                     name = name,
-                    region = getConfigParameter("region", config),
-                    profileName = getConfigParameter("profile", config),
+                    region = try { getConfigParameter("region", config) } catch (e: ParameterRequiredException) { null },
+                    profileName = try { getConfigParameter("profile", config) } catch (e: ParameterRequiredException) { null },
                     prefix = getConfigParameter("prefix", config),
                     keyId = getConfigParameter("kms-key-id", config, true),
                     separatorToReplace = config["separator-to-replace"]
