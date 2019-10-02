@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.9
+* Add silent type output, useful for automation, no parameters(secrets) will be displayed therefore it is safe to use with CI tools
+* Make profile and region setings for SSM optional when using aws environment config
+
 ## 0.1.8
 * Limit amount of requests to SSM, so it won't throttle the application
 * Support AWS Credentials provider chain, now it is possible to pass AWS credentials via environment variables
