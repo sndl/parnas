@@ -62,18 +62,15 @@ val shadowJar = shadowJar {
     }
 }.apply {
     task.archiveClassifier.set("")
-    task.doFirst{
-        val versionFile = File("src/main/resources/version.txt")
 
-        versionFile.let {
-            if (!it.exists()) {
-                it.parentFile.mkdirs()
-                it.createNewFile()
-            }
-
-            it.writeText(project.version.toString())
+    task.from(File("src/main/resources/version.txt").apply {
+        if (!exists()) {
+            parentFile.mkdirs()
+            createNewFile()
         }
-    }
+
+        writeText(project.version.toString())
+    })
 }
 
 githubRelease {
