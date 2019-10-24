@@ -196,6 +196,7 @@ class UpdateParamFrom : Command(
         |with parameters from another backend.""".trimMargin()) {
 
     private val fromBackend: String by argument("<from-backend>")
+    private val prefix by option("-p", "--prefix")
     private val force: Boolean by option("-f", "--force",
             help = "Overwrites all existing parameters if this flag is applied").flag(default = false)
 
@@ -212,7 +213,7 @@ class UpdateParamFrom : Command(
             }
 
             val oldParams = it.list()
-            val updatedParams = it.updateFrom(otherBackend)
+            val updatedParams = it.updateFrom(otherBackend, prefix.toStringOrEmpty())
             output.printUpdateFrom(oldParams, updatedParams, it, otherBackend)
         }
     }

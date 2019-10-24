@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.10
+* Add prefix support to `update-from` command
+* CLI version is now generated from version in `build.gradle.kts`
+
 ## 0.1.9
 * Add silent type output, useful for automation, no parameters(secrets) will be displayed therefore it is safe to use with CI tools
 * Make profile and region setings for SSM optional when using aws environment config

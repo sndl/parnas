@@ -74,8 +74,8 @@ abstract class Backend(val name: String) {
      * @return set of updated parameters
      */
     @Suppress("unused")
-    fun updateFrom(other: Backend): LinkedHashSet<ConfigOption> {
-        val notInThis = other.notIn(this)
+    fun updateFrom(other: Backend, prefix: String = ""): LinkedHashSet<ConfigOption> {
+        val notInThis = other.notIn(this, prefix)
 
         notInThis.forEach {
             this[it.key] = it.value

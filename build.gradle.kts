@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
 import tanvd.kosogor.proxy.shadowJar
 
 group = "sndl.parnas"
-version = "0.1.9"
+version = "0.1.10"
 description = "PARameter Naming And Storing"
 
 plugins {
@@ -62,6 +62,18 @@ val shadowJar = shadowJar {
     }
 }.apply {
     task.archiveClassifier.set("")
+    task.doFirst{
+        val versionFile = File("src/main/resources/version.txt")
+
+        versionFile.let {
+            if (!it.exists()) {
+                it.parentFile.mkdirs()
+                it.createNewFile()
+            }
+
+            it.writeText(project.version.toString())
+        }
+    }
 }
 
 githubRelease {
