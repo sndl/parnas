@@ -8,6 +8,7 @@ import com.github.ajalt.clikt.parameters.options.*
 import com.github.ajalt.clikt.parameters.types.choice
 import com.github.ajalt.clikt.parameters.types.file
 import sndl.parnas.backend.Backend
+import sndl.parnas.backend.ConfigOption
 import sndl.parnas.config.Config
 import sndl.parnas.output.Output
 import sndl.parnas.output.PrettyOutput
@@ -53,6 +54,14 @@ abstract class Command(name: String, help: String = "") : CliktCommand(name = na
     val backends: LinkedHashSet<Backend> by lazy { configObjects.backend }
     val output: Output by lazy { configObjects.output }
     val config: Config by lazy { configObjects.config }
+
+    fun prompt(): Boolean {
+        echo("""Do you want to apply changes above?
+            |Only 'yes' will be accepted
+        """.trimMargin())
+
+        return System.console().readLine("Enter value: ") == "yes"
+    }
 }
 
 class GetParam : Command("get", "Get value by key") {
@@ -95,16 +104,21 @@ class SetParam : Command("set", "Set specific value for a specific key, use --va
 
             val oldValue = it[key]?.value
 
+            output.printSet(ConfigOption(key, value!!), oldValue, it)
+
             if (oldValue != null) {
-                require(force) { exitProcessWithMessage(1, "ERROR: will not overwrite a parameter unless \"--force\" flag is applied") }
+                require(force || (output.interactive && prompt())) { exitProcessWithMessage(1, "WARNING: Changes were not applied") }
             }
-            output.printSet(it.set(key, value!!), oldValue, it)
+
+            it[key] = value
         }
     }
 }
 
 class RmParam : Command("rm", "Remove parameter by key") {
     private val key: String by argument()
+    private val force: Boolean by option("-f", "--force",
+            help = "Overwrites an existing parameter if this flag is applied").flag(default = false)
 
     override fun run() {
         // TODO@sndl: return ConfigOption from delete method
@@ -114,8 +128,13 @@ class RmParam : Command("rm", "Remove parameter by key") {
             }
 
             val oldValue = it[key]?.value
-            it.delete(key)
             output.printRm(key, oldValue, it)
+
+            if (oldValue != null) {
+                require(force || (output.interactive && prompt())) { exitProcessWithMessage(1, "WARNING: Changes were not applied") }
+            }
+
+            it.delete(key)
         }
     }
 }
@@ -169,7 +188,10 @@ class DestroyParam : Command(
     private val permitDestroy by option("--permit-destroy",
             help = "Permits/Prevents complete removal of parameters.")
             .flag("--prevent-destroy", default = false)
+    private val force: Boolean by option("-f", "--force",
+            help = "Overwrites all existing parameters if this flag is applied").flag(default = false)
 
+    //TODO: rewrite printDestroy()
     override fun run() {
         backends.forEach {
             require(it.isInitialized) {
@@ -178,14 +200,20 @@ class DestroyParam : Command(
 
             it.permitDestroy = permitDestroy
 
-            try {
-                it.destroy()
-            } catch (e: IllegalArgumentException) {
-                System.err.println(e.message)
-                exitProcess(1)
-            }
+            val paramsList = it.list()
+            output.printList(paramsList, "", it)
 
-            output.printDestroy(it)
+            if(paramsList.isNotEmpty()) {
+                require(force || (output.interactive && prompt())) { exitProcessWithMessage(1, "WARNING: Changes were not applied") }
+
+                try {
+                    it.destroy()
+                } catch (e: IllegalArgumentException) {
+                    exitProcessWithMessage(1, e.message ?: "Something went wrong")
+                }
+
+                output.printDestroy(it)
+            }
         }
     }
 }
@@ -203,18 +231,19 @@ class UpdateParamFrom : Command(
     override fun run() {
         val otherBackend = config.getBackend(fromBackend)
 
-        require(force) {
-            exitProcessWithMessage(1, "ERROR: \"--force\" flag is required, because this command could overwrite existing parameters")
-        }
-
         backends.forEach {
             require(it.isInitialized) {
                 exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
             }
 
             val oldParams = it.list()
-            val updatedParams = it.updateFrom(otherBackend, prefix.toStringOrEmpty())
-            output.printUpdateFrom(oldParams, updatedParams, it, otherBackend)
+            val paramsToUpdate = otherBackend.notIn(it, prefix.toStringOrEmpty())
+            output.printUpdateFrom(oldParams, paramsToUpdate, it, otherBackend)
+
+            if (paramsToUpdate.isNotEmpty()) {
+                require(force || (output.interactive && prompt())) { exitProcessWithMessage(1, "WARNING: Changes were not applied") }
+                it.updateFrom(otherBackend, prefix.toStringOrEmpty())
+            }
         }
     }
 }

@@ -8,6 +8,8 @@ import sndl.parnas.utils.quoted
 import sndl.parnas.utils.toStringOrEmpty
 
 sealed class Output {
+    abstract val interactive: Boolean
+
     abstract fun printGet(key: String, value: String?, backend: Backend)
 
     abstract fun printSet(configOption: ConfigOption, oldValue: String?, backend: Backend)
@@ -26,6 +28,8 @@ sealed class Output {
 }
 
 class PrettyOutput : Output() {
+    override val interactive = true
+
     private val style = TermColors()
 
     private fun decorateKey(input: String) = style.reset(input)
@@ -134,6 +138,8 @@ class PrettyOutput : Output() {
  * Output for automation purposes, when this output is used no parameters(secrets) are displayed, therefore CI tool won't store it in logs
  */
 class SilentOutput : Output() {
+    override val interactive = false
+
     private val warnMessage = "WARNING: Silent output is used, no parameters will be displayed"
 
     override fun printSet(configOption: ConfigOption, oldValue: String?, backend: Backend) {

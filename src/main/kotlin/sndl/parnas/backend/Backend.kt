@@ -46,7 +46,7 @@ abstract class Backend(val name: String) {
      * @param other backend to compare with
      * @param prefix an optional prefix to filter keys by
      */
-    private fun notIn(other: Backend, prefix: String = ""): LinkedHashSet<ConfigOption> {
+    fun notIn(other: Backend, prefix: String = ""): LinkedHashSet<ConfigOption> {
         val otherList = other.listByKeyPrefix(prefix)
 
         return listByKeyPrefix(prefix).filter { it !in otherList }.toLinkedSet()
