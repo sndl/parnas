@@ -9,7 +9,10 @@ import org.junit.ClassRule
 import org.junit.jupiter.api.*
 import sndl.parnas.backend.ConfigOption
 import sndl.parnas.backend.impl.SSM
+import sndl.parnas.utils.toLinkedSet
+import java.lang.IllegalArgumentException
 import java.util.UUID.randomUUID
+import kotlin.math.exp
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SSMWithSeparatorTest {
@@ -57,8 +60,6 @@ class SSMWithSeparatorTest {
                 ConfigOption("ENTRY_PREFIX.THIRD_ENTRY", "third-entry"),
                 ConfigOption("ENTRY_PREFIX.ENTRY_2ND_PREFIX.FOURTH_ENTRY", "fourth-entry")
         )
-
-        println(list)
 
         Assertions.assertEquals(expectedList, list)
     }
@@ -137,5 +138,61 @@ class SSMWithSeparatorTest {
         val sizeAfter = testBackend.list().size
 
         Assertions.assertTrue(sizeBefore - sizeAfter == 1)
+    }
+
+    @Test
+    fun destroyNonDestroyableBackend_backendExistsAndHasRecords_backendExistsAndHasRecords() {
+        val testBackend = backend
+
+        assertThrows<IllegalArgumentException> {
+            testBackend.destroy()
+        }
+    }
+
+    @Test
+    fun destroy_backendHasRecords_backendIsEmpty() {
+        val testBackend = backend
+
+        testBackend.permitDestroy = true
+        testBackend.destroy()
+
+        Assertions.assertTrue(testBackend.list().size == 0)
+    }
+
+    @Test
+    fun updateFrom_firstBackendHasRecords_firstBackendsHasAllItsRecordsAndRecordsFromSecondBackend() {
+        val backend1 = backend
+        val backend2 = backend.also {
+            it["additional_record1"] = "val1"
+            it["additional_record2"] = "val2"
+            it["additional_record3"] = "val3"
+        }
+
+        val backend1BeforeUpdateList = backend1.list()
+
+        backend1.updateFrom(backend2)
+        backend1.diff(backend2)
+
+        val expectedResult = backend1BeforeUpdateList + backend2.list()
+
+        Assertions.assertTrue(backend1.list() == expectedResult)
+    }
+
+    @Test
+    fun diff_bothBackendsHaveEntries_listOfDifferentEntriesReturned() {
+        val backend1 = backend.also {
+            it["commonRecord"] = "commonRecord"
+            it["uniqueRecord1"] = "uniqueRecord1"
+        }
+        val backend2 = backend.also {
+            it["commonRecord"] = "commonRecord"
+            it["uniqueRecord2"] = "uniqueRecord2"
+        }
+
+        val expectedResult = Pair(
+                listOf(ConfigOption("uniqueRecord2", "uniqueRecord2")).toLinkedSet(),
+                listOf(ConfigOption("uniqueRecord1", "uniqueRecord1")).toLinkedSet())
+
+        Assertions.assertTrue(backend1.diff(backend2) == expectedResult)
     }
 }
