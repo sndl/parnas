@@ -1,19 +1,35 @@
 package sndl.parnas
 
 import org.junit.jupiter.api.*
+import org.testcontainers.shaded.org.apache.commons.io.FileUtils
 import sndl.parnas.backend.ConfigOption
 import sndl.parnas.backend.impl.keepass.KeePass
 import sndl.parnas.utils.toLinkedSet
 import java.io.File
 import java.lang.IllegalArgumentException
+import java.util.UUID.randomUUID
 
 class KeePassBackendTest {
-    private val backend
-        get() = KeePass("keepass-test", "/tmp/parnas-keepass.kdbx", "test1234").also {
-            it.initialize()
-            it["FIRST_ENTRY"] = "first-entry"
-            it["SECOND_ENTRY"] = "second-entry"
+    companion object {
+        private val backend
+            get() = KeePass("keepass-test", "/tmp/parnas-keepass/${randomUUID()}.kdbx", "test1234").also {
+                it.initialize()
+                it["FIRST_ENTRY"] = "first-entry"
+                it["SECOND_ENTRY"] = "second-entry"
+            }
+
+        @JvmStatic
+        @BeforeAll
+        fun createTestDirectory() {
+            File("/tmp/parnas-keepass").mkdir()
         }
+
+        @JvmStatic
+        @AfterAll
+        fun cleanupTestBackend() {
+            FileUtils.deleteDirectory(File("/tmp/parnas-keepass/"))
+        }
+    }
 
     @Test
     fun list_backendIsNotEmpty_gotNotEmptyList() {
@@ -94,11 +110,6 @@ class KeePassBackendTest {
         val sizeAfter = testBackend.list().size
 
         Assertions.assertTrue(sizeBefore - sizeAfter == 1)
-    }
-
-    @AfterEach
-    fun cleanupTestBackend() {
-        File("/tmp/parnas-keepass.kdbx").delete()
     }
 
     @Test
