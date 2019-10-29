@@ -7,6 +7,8 @@ import com.github.ajalt.clikt.parameters.arguments.optional
 import com.github.ajalt.clikt.parameters.options.*
 import com.github.ajalt.clikt.parameters.types.choice
 import com.github.ajalt.clikt.parameters.types.file
+import org.apache.logging.log4j.Level
+import org.apache.logging.log4j.core.config.Configurator
 import sndl.parnas.backend.Backend
 import sndl.parnas.backend.ConfigOption
 import sndl.parnas.config.Config
@@ -24,10 +26,15 @@ class Cli : CliktCommand(name = "parnas", help = "This is a command line tool th
     private val outputMethod: String by option("-o", "--output",
             help = "Select preferred output method").choice("pretty", "silent").default("pretty")
     private val byTag by option("-t", "--by-tag").flag(default = false)
+    private val debug by option("--debug").flag(default = false)
 
     data class ConfigObjects(val backend: LinkedHashSet<Backend>, val output: Output, val config: Config)
 
     override fun run() {
+        if (debug) {
+            Configurator.setRootLevel(Level.DEBUG)
+        }
+
         val config = Config(configFile)
         val backends = try {
             if (byTag) {

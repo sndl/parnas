@@ -28,6 +28,8 @@ dependencies {
     compile("com.github.ajalt", "mordant", "1.2.0")
 
     compile("org.ini4j", "ini4j", "0.5.4")
+    compile("org.apache.logging.log4j", "log4j-core", "2.12.1")
+    compile("org.apache.logging.log4j", "log4j-slf4j-impl", "2.12.1")
 
     testCompile("org.junit.jupiter", "junit-jupiter-api", "5.4.1")
     testRuntime("org.junit.jupiter", "junit-jupiter-engine", "5.4.1")

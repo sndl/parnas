@@ -1,6 +1,7 @@
 package sndl.parnas.backend.impl.keepass
 
 import de.slackspace.openkeepass.exception.KeePassDatabaseUnreadableException
+import org.slf4j.LoggerFactory
 import sndl.parnas.backend.Backend
 import sndl.parnas.backend.ConfigOption
 import sndl.parnas.utils.*
@@ -13,10 +14,15 @@ class KeePass(name: String, path: String, password: String) : Backend(name) {
             password = getConfigParameter("password", config, true)
     )
 
+    companion object {
+        private val logger = LoggerFactory.getLogger(KeepassClient::class.java)
+    }
+
     private val file = File(path)
     private val data = try {
         KeepassClient(file, password)
     } catch (e: KeePassDatabaseUnreadableException) {
+        logger.debug(e.message, e)
         throw WrongSecret("An incorrect password for KeePass backend ($name)")
     }
 
