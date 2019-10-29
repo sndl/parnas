@@ -19,6 +19,7 @@ import sndl.parnas.utils.*
 import java.io.File
 import kotlin.system.exitProcess
 
+// TODO: to refactor - completely separate logic from output and CLI
 class Cli : CliktCommand(name = "parnas", help = "This is a command line tool that helps to manage configuration parameters in different backends") {
     private val backendIdentifier: String by argument("BACKEND|TAG")
     private val configFile: File by option("-c", "--config",
@@ -208,7 +209,7 @@ class DestroyParam : Command(
             it.permitDestroy = permitDestroy
 
             val paramsList = it.list()
-            output.printList(paramsList, "", it)
+            output.printDestroy(it, paramsList)
 
             if(paramsList.isNotEmpty()) {
                 require(force || (output.interactive && prompt())) { exitProcessWithMessage(1, "WARNING: Changes were not applied") }
@@ -218,8 +219,8 @@ class DestroyParam : Command(
                 } catch (e: IllegalArgumentException) {
                     exitProcessWithMessage(1, e.message ?: "Something went wrong")
                 }
-
-                output.printDestroy(it)
+            } else {
+                echo("Nothing to destroy.")
             }
         }
     }
@@ -250,6 +251,8 @@ class UpdateParamFrom : Command(
             if (paramsToUpdate.isNotEmpty()) {
                 require(force || (output.interactive && prompt())) { exitProcessWithMessage(1, "WARNING: Changes were not applied") }
                 it.updateFrom(otherBackend, prefix.toStringOrEmpty())
+            } else {
+                echo("Nothing to update.")
             }
         }
     }

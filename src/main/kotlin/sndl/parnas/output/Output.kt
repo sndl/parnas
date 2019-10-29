@@ -18,7 +18,7 @@ sealed class Output {
 
     abstract fun printList(configOptions: LinkedHashSet<ConfigOption>, prefix: String?, backend: Backend)
 
-    abstract fun printDestroy(backend: Backend)
+    abstract fun printDestroy(backend: Backend, configOptions: LinkedHashSet<ConfigOption>? = null)
 
     abstract fun printDiff(diff: Pair<LinkedHashSet<ConfigOption>, LinkedHashSet<ConfigOption>>,
                            prefix: String?, backend: Backend, otherBackend: Backend)
@@ -59,8 +59,15 @@ class PrettyOutput : Output() {
         printConfigOptionSet(configOptions)
     }
 
-    override fun printDestroy(backend: Backend) {
-        echo("${decorateBackend(backend.name)}/${decorateKey("*")}: ${style.red("DESTROYED")}")
+    override fun printDestroy(backend: Backend, configOptions: LinkedHashSet<ConfigOption>?) {
+        val longestKey = configOptions?.map { it.key }?.maxBy { it.length }?.length ?: 0
+
+        configOptions?.forEach {
+            val spacing = longestKey - it.key.length + 1
+
+            echo("${style.red("-")} ${decorateKey(it.key)}${" ".repeat(spacing)}= " +
+                    decorateValue(it.value))
+        } ?: echo("${decorateBackend(backend.name)}/${decorateKey("*")}: ${style.red("DESTROYED")}")
     }
 
     override fun printDiff(diff: Pair<LinkedHashSet<ConfigOption>, LinkedHashSet<ConfigOption>>,
@@ -157,7 +164,7 @@ class SilentOutput : Output() {
         echo("There are ${configOptions.size} parameters")
     }
 
-    override fun printDestroy(backend: Backend) {
+    override fun printDestroy(backend: Backend, configOptions: LinkedHashSet<ConfigOption>?) {
         echo(warnMessage)
         echo("Backend was destroyed")
     }
