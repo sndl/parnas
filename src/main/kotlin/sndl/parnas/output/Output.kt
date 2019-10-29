@@ -62,6 +62,7 @@ class PrettyOutput : Output() {
     override fun printDestroy(backend: Backend, configOptions: LinkedHashSet<ConfigOption>?) {
         val longestKey = configOptions?.map { it.key }?.maxBy { it.length }?.length ?: 0
 
+        echo("${decorateBackend(backend.name)}/${decorateKey("*")}:")
         configOptions?.forEach {
             val spacing = longestKey - it.key.length + 1
 
