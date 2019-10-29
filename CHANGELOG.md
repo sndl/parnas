@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.0
+* Implement prompts for potentially destructive commands (set, rm, update-from, destroy)
+* Cover destroy, diff and updateFrom methods with unit tests
+* Implement cross backend tests
+* Add log4j logging support
+* Improve destroy command output
+
 ## 0.1.10
 * Add prefix support to `update-from` command
 * CLI version is now generated from version in `build.gradle.kts`
