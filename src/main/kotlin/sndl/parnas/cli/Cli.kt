@@ -65,10 +65,12 @@ abstract class Command(name: String, help: String = "") : CliktCommand(name = na
 
     fun prompt(): Boolean {
         echo("""Do you want to apply changes above?
-            |Only 'yes' will be accepted
+            |Only 'yes' or 'y' will be accepted
         """.trimMargin())
 
-        return System.console().readLine("Enter value: ") == "yes"
+        val userResponse = System.console().readLine("Enter value: ")
+
+        return userResponse == "yes" || userResponse == "y"
     }
 }
 
