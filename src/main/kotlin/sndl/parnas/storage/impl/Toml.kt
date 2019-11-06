@@ -1,14 +1,14 @@
-package sndl.parnas.backend.impl
+package sndl.parnas.storage.impl
 
 import com.electronwill.nightconfig.core.AbstractConfig
 import com.electronwill.nightconfig.core.Config
 import com.electronwill.nightconfig.core.file.FileConfig
-import sndl.parnas.backend.Backend
-import sndl.parnas.backend.ConfigOption
+import sndl.parnas.storage.Storage
+import sndl.parnas.storage.ConfigOption
 import sndl.parnas.utils.*
 import java.io.File
 
-class Toml(name: String, private val path: String) : Backend(name) {
+class Toml(name: String, private val path: String) : Storage(name) {
     constructor(name: String, config: Map<String, String>) :
             this(name = name, path = getConfigParameter("path", config))
 
@@ -58,7 +58,7 @@ class Toml(name: String, private val path: String) : Backend(name) {
 
     override fun initialize() {
         if (isInitialized) {
-            throw CannotInitializeBackend("Backend is already initialized")
+            throw CannotInitializeStorage("Storage is already initialized")
         }
 
         file.createNewFile()

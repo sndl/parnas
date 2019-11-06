@@ -9,8 +9,8 @@ import com.github.ajalt.clikt.parameters.types.choice
 import com.github.ajalt.clikt.parameters.types.file
 import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.core.config.Configurator
-import sndl.parnas.backend.Backend
-import sndl.parnas.backend.ConfigOption
+import sndl.parnas.storage.Storage
+import sndl.parnas.storage.ConfigOption
 import sndl.parnas.config.Config
 import sndl.parnas.output.Output
 import sndl.parnas.output.PrettyOutput
@@ -20,8 +20,8 @@ import java.io.File
 import kotlin.system.exitProcess
 
 // TODO: to refactor - completely separate logic from output and CLI
-class Cli : CliktCommand(name = "parnas", help = "This is a command line tool that helps to manage configuration parameters in different backends") {
-    private val backendIdentifier: String by argument("BACKEND|TAG")
+class Cli : CliktCommand(name = "parnas", help = "This is a command line tool that helps to manage configuration parameters in different storages") {
+    private val storageIdentifier: String by argument("BACKEND|TAG")
     private val configFile: File by option("-c", "--config",
             help = "Path to config file").file().default(File("parnas.conf"))
     private val outputMethod: String by option("-o", "--output",
@@ -29,7 +29,7 @@ class Cli : CliktCommand(name = "parnas", help = "This is a command line tool th
     private val byTag by option("-t", "--by-tag").flag(default = false)
     private val debug by option("--debug").flag(default = false)
 
-    data class ConfigObjects(val backend: LinkedHashSet<Backend>, val output: Output, val config: Config)
+    data class ConfigObjects(val storage: LinkedHashSet<Storage>, val output: Output, val config: Config)
 
     override fun run() {
         if (debug) {
@@ -37,11 +37,11 @@ class Cli : CliktCommand(name = "parnas", help = "This is a command line tool th
         }
 
         val config = Config(configFile)
-        val backends = try {
+        val storages = try {
             if (byTag) {
-                config.getBackendsByTag(backendIdentifier)
+                config.getStoragesByTag(storageIdentifier)
             } else {
-                linkedSetOf(config.getBackend(backendIdentifier))
+                linkedSetOf(config.getStorage(storageIdentifier))
             }
         } catch (e: ConfigurationException) {
             exitProcessWithMessage(1, "Configuration error: ${e.message}")
@@ -53,13 +53,13 @@ class Cli : CliktCommand(name = "parnas", help = "This is a command line tool th
             else -> throw ConfigurationException("\"$outputMethod\" output is not supported")
         }
 
-        context.obj = ConfigObjects(backends, output, config)
+        context.obj = ConfigObjects(storages, output, config)
     }
 }
 
 abstract class Command(name: String, help: String = "") : CliktCommand(name = name, help = help) {
     private val configObjects by requireObject<Cli.ConfigObjects>()
-    val backends: LinkedHashSet<Backend> by lazy { configObjects.backend }
+    val storages: LinkedHashSet<Storage> by lazy { configObjects.storage }
     val output: Output by lazy { configObjects.output }
     val config: Config by lazy { configObjects.config }
 
@@ -78,7 +78,7 @@ class GetParam : Command("get", "Get value by key") {
     private val key: String by argument()
 
     override fun run() {
-        backends.forEach {
+        storages.forEach {
             output.printGet(key, it[key]?.value, it)
         }
     }
@@ -90,7 +90,7 @@ class SetParam : Command("set", "Set specific value for a specific key, use --va
     /**
      * This is done as a workaround for a problem with uploading values that contain '=' sign,
      * when this is the case you have to use --value option, otherwise clikt will try to parse string before '=' as an
-     * option name. Example: parnas backendName set NewParam --value="DC=org,DC=acme"
+     * option name. Example: parnas storageName set NewParam --value="DC=org,DC=acme"
      */
     private val valueOpt: String? by option("--value")
     private val force: Boolean by option("-f", "--force",
@@ -107,9 +107,9 @@ class SetParam : Command("set", "Set specific value for a specific key, use --va
             }
         }
 
-        backends.forEach {
+        storages.forEach {
             require(it.isInitialized) {
-                exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
+                exitProcessWithMessage(1, "ERROR: storage \"${it.name}\" is not initialized")
             }
 
             val oldValue = it[key]?.value
@@ -132,9 +132,9 @@ class RmParam : Command("rm", "Remove parameter by key") {
 
     override fun run() {
         // TODO@sndl: return ConfigOption from delete method
-        backends.forEach {
+        storages.forEach {
             require(it.isInitialized) {
-                exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
+                exitProcessWithMessage(1, "ERROR: storage \"${it.name}\" is not initialized")
             }
 
             val oldValue = it[key]?.value
@@ -154,15 +154,15 @@ class ListParam : Command("list", "List all parameters") {
 
     override fun run() {
         if (prefix == null) {
-            backends.forEach {
+            storages.forEach {
                 require(it.isInitialized) {
-                    exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
+                    exitProcessWithMessage(1, "ERROR: storage \"${it.name}\" is not initialized")
                 }
                 output.printList(it.list(), prefix, it)
             }
         } else {
-            backends.forEach {
-                if (!it.isInitialized) exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
+            storages.forEach {
+                if (!it.isInitialized) exitProcessWithMessage(1, "ERROR: storage \"${it.name}\" is not initialized")
                 output.printList(it.listByKeyPrefix(prefix.toStringOrEmpty()), prefix, it)
             }
         }
@@ -171,19 +171,19 @@ class ListParam : Command("list", "List all parameters") {
 
 class DiffParam : Command(
         name = "diff",
-        help = "Print difference between two backends"
+        help = "Print difference between two storages"
 ) {
-    private val otherBackendName: String by argument("<other-backend>")
+    private val otherStorageName: String by argument("<other-storage>")
     private val prefix by option("-p", "--prefix", help = "If set only keys by this prefix are shown")
 
     override fun run() {
-        val otherBackend = config.getBackend(otherBackendName)
-        backends.forEach {
+        val otherStorage = config.getStorage(otherStorageName)
+        storages.forEach {
             require(it.isInitialized) {
-                exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
+                exitProcessWithMessage(1, "ERROR: storage \"${it.name}\" is not initialized")
             }
 
-            output.printDiff(it.diff(otherBackend, prefix.toStringOrEmpty()), prefix, it, otherBackend)
+            output.printDiff(it.diff(otherStorage, prefix.toStringOrEmpty()), prefix, it, otherStorage)
         }
     }
 }
@@ -203,9 +203,9 @@ class DestroyParam : Command(
 
     //TODO: rewrite printDestroy()
     override fun run() {
-        backends.forEach {
+        storages.forEach {
             require(it.isInitialized) {
-                exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
+                exitProcessWithMessage(1, "ERROR: storage \"${it.name}\" is not initialized")
             }
 
             it.permitDestroy = permitDestroy
@@ -230,29 +230,29 @@ class DestroyParam : Command(
 
 class UpdateParamFrom : Command(
         name = "update-from",
-        help = """Updates all parameters, that are not present or different in this backend,
-        |with parameters from another backend.""".trimMargin()) {
+        help = """Updates all parameters, that are not present or different in this storage,
+        |with parameters from another storage.""".trimMargin()) {
 
-    private val fromBackend: String by argument("<from-backend>")
+    private val fromStorage: String by argument("<from-storage>")
     private val prefix by option("-p", "--prefix")
     private val force: Boolean by option("-f", "--force",
             help = "Overwrites all existing parameters if this flag is applied").flag(default = false)
 
     override fun run() {
-        val otherBackend = config.getBackend(fromBackend)
+        val otherStorage = config.getStorage(fromStorage)
 
-        backends.forEach {
+        storages.forEach {
             require(it.isInitialized) {
-                exitProcessWithMessage(1, "ERROR: backend \"${it.name}\" is not initialized")
+                exitProcessWithMessage(1, "ERROR: storage \"${it.name}\" is not initialized")
             }
 
             val oldParams = it.list()
-            val paramsToUpdate = otherBackend.notIn(it, prefix.toStringOrEmpty())
-            output.printUpdateFrom(oldParams, paramsToUpdate, it, otherBackend)
+            val paramsToUpdate = otherStorage.notIn(it, prefix.toStringOrEmpty())
+            output.printUpdateFrom(oldParams, paramsToUpdate, it, otherStorage)
 
             if (paramsToUpdate.isNotEmpty()) {
                 require(force || (output.interactive && prompt())) { exitProcessWithMessage(1, "WARNING: Changes were not applied") }
-                it.updateFrom(otherBackend, prefix.toStringOrEmpty())
+                it.updateFrom(otherStorage, prefix.toStringOrEmpty())
             } else {
                 echo("Nothing to update.")
             }
@@ -260,17 +260,18 @@ class UpdateParamFrom : Command(
     }
 }
 
-class InitializeBackend : Command(
+class InitializeStorage : Command(
         name = "init",
-        help = "Initialize the backend, i.e. create database file"
+        help = "Initialize the storage, i.e. create database file"
 ) {
     override fun run() {
-        backends.forEach {
+        storages.forEach {
             try {
                 it.initialize()
-            } catch (e: CannotInitializeBackend) {
+            } catch (e: CannotInitializeStorage) {
                 exitProcessWithMessage(1, "ERROR: ${e.message} (${it.name})")
             }
         }
     }
 }
+

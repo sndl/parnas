@@ -1,12 +1,12 @@
-package sndl.parnas.backend.impl
+package sndl.parnas.storage.impl
 
-import sndl.parnas.backend.Backend
-import sndl.parnas.backend.ConfigOption
+import sndl.parnas.storage.Storage
+import sndl.parnas.storage.ConfigOption
 import sndl.parnas.utils.*
 import java.io.File
 import java.util.*
 
-class Plain(name: String, private val path: String) : Backend(name) {
+class Plain(name: String, private val path: String) : Storage(name) {
     constructor(name: String, config: Map<String, String>) :
             this(name = name, path = getConfigParameter("path", config))
 
@@ -24,7 +24,7 @@ class Plain(name: String, private val path: String) : Backend(name) {
 
     override fun initialize() {
         if (isInitialized) {
-            throw CannotInitializeBackend("Backend is already initialized")
+            throw CannotInitializeStorage("Storage is already initialized")
         }
 
         file.createNewFile()

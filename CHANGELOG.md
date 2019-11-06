@@ -3,7 +3,7 @@
 ## 0.2.0
 * Implement prompts for potentially destructive commands (set, rm, update-from, destroy)
 * Cover destroy, diff and updateFrom methods with unit tests
-* Implement cross backend tests
+* Implement cross storage tests
 * Add log4j logging support
 * Improve destroy command output
 
@@ -38,13 +38,13 @@ This will keeping compatibility between different config backends (i.e. Toml) an
 
 ## 0.1.3
 
-* `list` command on SSM backend now returns all parameters with recursive call
+* `list` command on SSM storage now returns all parameters with recursive call
 
 ## 0.1.2
 
-* Add fallback to password from a file for Keepass backend. Filename can now be specified in config as `password-from-file`
+* Add fallback to password from a file for Keepass storage. Filename can now be specified in config as `password-from-file`
 
 ## 0.1.1
 
 * Change "cli" to "parnas" in usage help
-* Add fallback to password from a file for Keepass backend
+* Add fallback to password from a file for Keepass storage

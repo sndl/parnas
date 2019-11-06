@@ -16,23 +16,23 @@ fun <T> buildSet(body: LinkedHashSet<T>.() -> Unit): LinkedHashSet<T> {
 
 /**
  * Method used to retrieve parameter values from config file and provides an optional fallback to:
- * *  Environment parameter, which name is constructed this way: PARNAS_${BACKEND_NAME}_${PARAMETER_NAME}
- * *  Contents from a file, which name should be like: parnas_${backend_name}_{parameter_name}
+ * *  Environment parameter, which name is constructed this way: PARNAS_${STORAGE_NAME}_${PARAMETER_NAME}
+ * *  Contents from a file, which name should be like: parnas_${storage_name}_{parameter_name}
  * *  Console prompt
  */
-fun getConfigParameter(parameterName: String, backendConfig: Map<String, String>, fallback: Boolean = false): String {
+fun getConfigParameter(parameterName: String, storageConfig: Map<String, String>, fallback: Boolean = false): String {
     return if (fallback) {
-        backendConfig[parameterName]
-                ?: System.getenv("PARNAS_${backendConfig.getValue("name").toUpperCase()}_${parameterName.toUpperCase()}")
-                ?: backendConfig["$parameterName-from-file"]?.let { getFileContentOrNull(it) }
-                ?: getFileContentOrNull(".parnas_${backendConfig.getValue("name")}_$parameterName")
+        storageConfig[parameterName]
+                ?: System.getenv("PARNAS_${storageConfig.getValue("name").toUpperCase()}_${parameterName.toUpperCase()}")
+                ?: storageConfig["$parameterName-from-file"]?.let { getFileContentOrNull(it) }
+                ?: getFileContentOrNull(".parnas_${storageConfig.getValue("name")}_$parameterName")
                 ?: System.console()
-                        .readPassword("Please enter value for backend \"${backendConfig["name"]}\" parameter \"$parameterName\": ")
+                        .readPassword("Please enter value for storage \"${storageConfig["name"]}\" parameter \"$parameterName\": ")
                         .joinToString("")
-                ?: throw ParameterRequiredException(parameterName, backendConfig.getValue("type"))
+                ?: throw ParameterRequiredException(parameterName, storageConfig.getValue("type"))
     } else {
-        backendConfig[parameterName]
-                ?: throw ParameterRequiredException(parameterName, backendConfig.getValue("type"))
+        storageConfig[parameterName]
+                ?: throw ParameterRequiredException(parameterName, storageConfig.getValue("type"))
     }
 }
 

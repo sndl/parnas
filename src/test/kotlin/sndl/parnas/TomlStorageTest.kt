@@ -2,16 +2,16 @@ package sndl.parnas
 
 import org.junit.jupiter.api.*
 import org.testcontainers.shaded.org.apache.commons.io.FileUtils
-import sndl.parnas.backend.ConfigOption
-import sndl.parnas.backend.impl.Toml
+import sndl.parnas.storage.ConfigOption
+import sndl.parnas.storage.impl.Toml
 import sndl.parnas.utils.toLinkedSet
 import java.io.File
 import java.lang.IllegalArgumentException
 import java.util.UUID.randomUUID
 
-class TomlBackendTest {
+class TomlStorageTest {
     companion object {
-        private val backend
+        private val storage
             get() = Toml("toml-test", "/tmp/parnas-toml/${randomUUID()}.toml").also {
                 it.initialize()
                 it["FIRST_ENTRY"] = "first-entry"
@@ -29,19 +29,19 @@ class TomlBackendTest {
 
         @JvmStatic
         @AfterAll
-        fun cleanupTestBackend() {
+        fun cleanupTestStorage() {
             FileUtils.deleteDirectory(File("/tmp/parnas-toml/"))
         }
     }
 
     @Test
-    fun list_backendIsNotEmpty_gotNotEmptyList() {
-        Assertions.assertTrue(backend.list().size > 0)
+    fun list_storageIsNotEmpty_gotNotEmptyList() {
+        Assertions.assertTrue(storage.list().size > 0)
     }
 
     @Test
-    fun list_backendIsNotEmpty_gotExpectedListOfValues() {
-        val list = backend.list()
+    fun list_storageIsNotEmpty_gotExpectedListOfValues() {
+        val list = storage.list()
         val expectedList = setOf(
                 ConfigOption("FIRST_ENTRY", "first-entry"),
                 ConfigOption("SECOND_ENTRY", "second-entry"),
@@ -55,137 +55,137 @@ class TomlBackendTest {
 
     @Test
     fun get_entryExists_gotEntry() {
-        Assertions.assertEquals(ConfigOption("FIRST_ENTRY", "first-entry"), backend["FIRST_ENTRY"])
+        Assertions.assertEquals(ConfigOption("FIRST_ENTRY", "first-entry"), storage["FIRST_ENTRY"])
     }
 
     @Test
     fun getEntryFromSection_entryExists_gotEntry() {
         Assertions.assertEquals(ConfigOption("SECTION1.FIRST_ENTRY", "section1-first-entry"),
-                backend["SECTION1.FIRST_ENTRY"])
+                storage["SECTION1.FIRST_ENTRY"])
     }
 
     @Test
     fun getEntryFromSubsection_entryExists_gotEntry() {
         Assertions.assertEquals(ConfigOption("SECTION1.SUBSECTION1.FIRST_ENTRY", "section1-subsection1-first-entry"),
-                backend["SECTION1.SUBSECTION1.FIRST_ENTRY"])
+                storage["SECTION1.SUBSECTION1.FIRST_ENTRY"])
     }
 
     @Test
     fun get_entryDoesNotExist_gotNull() {
-        Assertions.assertNull(backend["THIRD_ENTRY"])
+        Assertions.assertNull(storage["THIRD_ENTRY"])
     }
 
     @Test
     fun get_sectionEntryExists_gotEntry() {
         Assertions.assertEquals(ConfigOption("SECTION1.FIRST_ENTRY", "section1-first-entry"),
-                backend["SECTION1.FIRST_ENTRY"])
+                storage["SECTION1.FIRST_ENTRY"])
     }
 
     @Test
     fun get_sectionEntryDoesNotExist_gotNull() {
-        Assertions.assertNull(backend["SECTION1.SECOND_ENTRY"])
+        Assertions.assertNull(storage["SECTION1.SECOND_ENTRY"])
     }
 
     @Test
     fun set_entryDoesNotExist_entryExists() {
-        val testBackend = backend
+        val testStorage = storage
 
-        testBackend["THIRD_ENTRY"] = "third-entry"
+        testStorage["THIRD_ENTRY"] = "third-entry"
 
         val expectedEntry = ConfigOption("THIRD_ENTRY", "third-entry")
-        val entry = testBackend["THIRD_ENTRY"]
+        val entry = testStorage["THIRD_ENTRY"]
 
         Assertions.assertEquals(expectedEntry, entry)
     }
 
     @Test
     fun set_entryDoesNotExist_exactlyOneEntryIsCreated() {
-        val testBackend = backend
-        val beforeSize = testBackend.list().size
+        val testStorage = storage
+        val beforeSize = testStorage.list().size
 
-        testBackend["THIRD_ENTRY"] = "third-entry"
+        testStorage["THIRD_ENTRY"] = "third-entry"
 
-        val afterSize = testBackend.list().size
+        val afterSize = testStorage.list().size
 
         Assertions.assertTrue(afterSize - beforeSize == 1)
     }
 
     @Test
     fun set_entryExists_entryUpdated() {
-        val testBackend = backend
+        val testStorage = storage
 
-        testBackend["FIRST_ENTRY"] = "updated-first-entry"
+        testStorage["FIRST_ENTRY"] = "updated-first-entry"
 
         val expectedEntry = ConfigOption("FIRST_ENTRY", "updated-first-entry")
-        val entry = testBackend["FIRST_ENTRY"]
+        val entry = testStorage["FIRST_ENTRY"]
 
         Assertions.assertEquals(expectedEntry, entry)
     }
 
     @Test
     fun delete_entryExists_entryDoesNotExist() {
-        val testBackend = backend
-        testBackend.delete("FIRST_ENTRY")
-        Assertions.assertNull(testBackend["FIRST_ENTRY"])
+        val testStorage = storage
+        testStorage.delete("FIRST_ENTRY")
+        Assertions.assertNull(testStorage["FIRST_ENTRY"])
     }
 
     @Test
     fun delete_entryExists_exactlyOneEntryIsRemoved() {
-        val testBackend = backend
-        val sizeBefore = testBackend.list().size
+        val testStorage = storage
+        val sizeBefore = testStorage.list().size
 
-        testBackend.delete("FIRST_ENTRY")
+        testStorage.delete("FIRST_ENTRY")
 
-        val sizeAfter = testBackend.list().size
+        val sizeAfter = testStorage.list().size
 
         Assertions.assertTrue(sizeBefore - sizeAfter == 1)
     }
 
     @Test
-    fun destroyNonDestroyableBackend_backendExistsAndHasRecords_backendExistsAndHasRecords() {
-        val testBackend = backend
+    fun destroyNonDestroyableStorage_storageExistsAndHasRecords_storageExistsAndHasRecords() {
+        val testStorage = storage
 
         assertThrows<IllegalArgumentException> {
-            testBackend.destroy()
+            testStorage.destroy()
         }
     }
 
     @Test
-    fun destroy_backendHasRecords_backendIsEmpty() {
-        val testBackend = backend
+    fun destroy_storageHasRecords_storageIsEmpty() {
+        val testStorage = storage
 
-        testBackend.permitDestroy = true
-        testBackend.destroy()
+        testStorage.permitDestroy = true
+        testStorage.destroy()
 
-        Assertions.assertTrue(testBackend.list().size == 0)
+        Assertions.assertTrue(testStorage.list().size == 0)
     }
 
     @Test
-    fun updateFrom_firstBackendHasRecords_firstBackendsHasAllItsRecordsAndRecordsFromSecondBackend() {
-        val backend1 = backend
-        val backend2 = backend.also {
+    fun updateFrom_firstStorageHasRecords_firstStoragesHasAllItsRecordsAndRecordsFromSecondStorage() {
+        val storage1 = storage
+        val storage2 = storage.also {
             it["additional_record1"] = "val1"
             it["additional_record2"] = "val2"
             it["additional_record3"] = "val3"
         }
 
-        val backend1BeforeUpdateList = backend1.list()
+        val storage1BeforeUpdateList = storage1.list()
 
-        backend1.updateFrom(backend2)
-        backend1.diff(backend2)
+        storage1.updateFrom(storage2)
+        storage1.diff(storage2)
 
-        val expectedResult = backend1BeforeUpdateList + backend2.list()
+        val expectedResult = storage1BeforeUpdateList + storage2.list()
 
-        Assertions.assertTrue(backend1.list() == expectedResult)
+        Assertions.assertTrue(storage1.list() == expectedResult)
     }
 
     @Test
-    fun diff_bothBackendsHaveEntries_listOfDifferentEntriesReturned() {
-        val backend1 = backend.also {
+    fun diff_bothStoragesHaveEntries_listOfDifferentEntriesReturned() {
+        val storage1 = storage.also {
             it["commonRecord"] = "commonRecord"
             it["uniqueRecord1"] = "uniqueRecord1"
         }
-        val backend2 = backend.also {
+        val storage2 = storage.also {
             it["commonRecord"] = "commonRecord"
             it["uniqueRecord2"] = "uniqueRecord2"
         }
@@ -194,6 +194,6 @@ class TomlBackendTest {
                 listOf(ConfigOption("uniqueRecord2", "uniqueRecord2")).toLinkedSet(),
                 listOf(ConfigOption("uniqueRecord1", "uniqueRecord1")).toLinkedSet())
 
-        Assertions.assertTrue(backend1.diff(backend2) == expectedResult)
+        Assertions.assertTrue(storage1.diff(storage2) == expectedResult)
     }
 }

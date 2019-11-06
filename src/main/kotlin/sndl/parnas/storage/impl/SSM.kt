@@ -1,4 +1,4 @@
-package sndl.parnas.backend.impl
+package sndl.parnas.storage.impl
 
 import com.amazonaws.auth.AWSCredentialsProviderChain
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider
@@ -7,8 +7,8 @@ import com.amazonaws.regions.DefaultAwsRegionProviderChain
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagement
 import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder
 import com.amazonaws.services.simplesystemsmanagement.model.*
-import sndl.parnas.backend.Backend
-import sndl.parnas.backend.ConfigOption
+import sndl.parnas.storage.Storage
+import sndl.parnas.storage.ConfigOption
 import sndl.parnas.utils.*
 import java.lang.reflect.InvocationHandler
 import java.lang.reflect.InvocationTargetException
@@ -17,7 +17,7 @@ import java.lang.reflect.Proxy
 import kotlin.system.measureTimeMillis
 
 class SSM(name: String, ssmClient: AWSSimpleSystemsManagement,
-          var prefix: String, private val keyId: String, private val separatorToReplace: String? = null) : Backend(name) {
+          var prefix: String, private val keyId: String, private val separatorToReplace: String? = null) : Storage(name) {
 
     constructor(name: String, region: String?, profileName: String?,
                 prefix: String, keyId: String, separatorToReplace: String? = null) :
@@ -95,7 +95,7 @@ class SSM(name: String, ssmClient: AWSSimpleSystemsManagement,
      * Does nothing in context of SSM, because it cannot be initialized
      */
     override fun initialize() {
-        throw CannotInitializeBackend("There is no need to initialize backend of SSM type")
+        throw CannotInitializeStorage("There is no need to initialize storage of SSM type")
     }
 
     override fun list() = buildSet<ConfigOption> {

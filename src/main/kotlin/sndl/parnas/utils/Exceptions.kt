@@ -2,11 +2,11 @@ package sndl.parnas.utils
 
 open class ConfigurationException(message: String) : Exception(message)
 
-class ParameterRequiredException(name: String, backendType: String)
-    : ConfigurationException("\"$name\" is required for backend type \"$backendType\"")
+class ParameterRequiredException(name: String, storageType: String)
+    : ConfigurationException("\"$name\" is required for storage type \"$storageType\"")
 
-class CannotInitializeBackend(message: String) : ConfigurationException(message)
+class CannotInitializeStorage(message: String) : ConfigurationException(message)
 
-class BackendIsNotInitialized(message: String) : ConfigurationException(message)
+class StorageIsNotInitialized(message: String) : ConfigurationException(message)
 
 class WrongSecret(message: String) : ConfigurationException(message)

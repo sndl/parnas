@@ -1,4 +1,4 @@
-package sndl.parnas.backend.impl.keepass
+package sndl.parnas.storage.impl.keepass
 
 import de.slackspace.openkeepass.KeePassDatabase
 import de.slackspace.openkeepass.domain.*

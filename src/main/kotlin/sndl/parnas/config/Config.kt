@@ -1,9 +1,9 @@
 package sndl.parnas.config
 
 import org.ini4j.Ini
-import sndl.parnas.backend.Backend
-import sndl.parnas.backend.impl.*
-import sndl.parnas.backend.impl.keepass.KeePass
+import sndl.parnas.storage.Storage
+import sndl.parnas.storage.impl.*
+import sndl.parnas.storage.impl.keepass.KeePass
 import sndl.parnas.utils.ConfigurationException
 import sndl.parnas.utils.toLinkedSet
 import java.io.File
@@ -13,25 +13,25 @@ class Config(configFile: File) {
     private val ini = Ini(FileReader(configFile))
 
     companion object {
-        private val backends = HashMap<String, Backend>()
+        private val storages = HashMap<String, Storage>()
     }
 
-    fun getBackend(name: String) = backends.getOrPut(name) { initBackend(name) }
+    fun getStorage(name: String) = storages.getOrPut(name) { initStorage(name) }
 
-    fun getBackendsByTag(tag: String) = ini.filter {
+    fun getStoragesByTag(tag: String) = ini.filter {
         tag in it.value["tags"]?.split(",")?.map { it.trim() } ?: emptyList()
-    }.map { getBackend(it.key) }.toLinkedSet()
+    }.map { getStorage(it.key) }.toLinkedSet()
 
-    private fun initBackend(name: String): Backend {
-        val backendConfig = ini[name]?.apply { add("name", name) }
-                ?: throw ConfigurationException("configuration for the backend named \"$name\" is absent")
+    private fun initStorage(name: String): Storage {
+        val storageConfig = ini[name]?.apply { add("name", name) }
+                ?: throw ConfigurationException("configuration for the storage named \"$name\" is absent")
 
-        return when (backendConfig["type"]) {
-            "plain" -> Plain(name, backendConfig)
-            "ssm" -> SSM(name, backendConfig)
-            "keepass" -> KeePass(name, backendConfig)
-            "toml" -> Toml(name, backendConfig)
-            else -> throw ConfigurationException("specified backend type is not supported: ${backendConfig["type"]}")
+        return when (storageConfig["type"]) {
+            "plain" -> Plain(name, storageConfig)
+            "ssm" -> SSM(name, storageConfig)
+            "keepass" -> KeePass(name, storageConfig)
+            "toml" -> Toml(name, storageConfig)
+            else -> throw ConfigurationException("specified storage type is not supported: ${storageConfig["type"]}")
         }
     }
 }

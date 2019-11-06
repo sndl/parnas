@@ -10,18 +10,18 @@ import org.junit.jupiter.api.Assertions
 import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.testcontainers.shaded.org.apache.commons.io.FileUtils
-import sndl.parnas.backend.Backend
-import sndl.parnas.backend.ConfigOption
-import sndl.parnas.backend.impl.Plain
-import sndl.parnas.backend.impl.SSM
-import sndl.parnas.backend.impl.Toml
-import sndl.parnas.backend.impl.keepass.KeePass
+import sndl.parnas.storage.Storage
+import sndl.parnas.storage.ConfigOption
+import sndl.parnas.storage.impl.Plain
+import sndl.parnas.storage.impl.SSM
+import sndl.parnas.storage.impl.Toml
+import sndl.parnas.storage.impl.keepass.KeePass
 import sndl.parnas.utils.toLinkedSet
 import java.io.File
 import java.util.UUID.randomUUID
 
-class CrossBackendTest {
-    enum class Backends {
+class CrossStorageTest {
+    enum class Storages {
         PLAIN {
             override val get
                 get() = Plain("plain-test", "/tmp/parnas-${this.name.toLowerCase()}/${randomUUID()}.properties").also {
@@ -50,7 +50,7 @@ class CrossBackendTest {
                 }
         };
 
-        abstract val get: Backend
+        abstract val get: Storage
     }
 
     companion object {
@@ -74,134 +74,134 @@ class CrossBackendTest {
         @JvmStatic
         @BeforeAll
         fun createTestDirectory() {
-            Backends.values().forEach {
+            Storages.values().forEach {
                 File("/tmp/parnas-${it.name.toLowerCase()}").mkdir()
             }
         }
 
         @JvmStatic
         @AfterAll
-        fun cleanupTestBackend() {
-            Backends.values().forEach {
+        fun cleanupTestStorage() {
+            Storages.values().forEach {
                 FileUtils.deleteDirectory(File("/tmp/parnas-${it.name.toLowerCase()}"))
             }
         }
     }
 
     @Test
-    fun diffPlain_twoBackendsWithUniqueEntries_correctDiffBetweenBackends() {
-        val backend = Backends.PLAIN.get.also {
+    fun diffPlain_twoStoragesWithUniqueEntries_correctDiffBetweenStorages() {
+        val storage = Storages.PLAIN.get.also {
             it["UNIQUE_ENTRY_1"] = "unique-entry-1"
         }
         val expectedResult = Pair(
                 listOf(ConfigOption("UNIQUE_ENTRY_2", "unique-entry-2")).toLinkedSet(),
                 listOf(ConfigOption("UNIQUE_ENTRY_1", "unique-entry-1")).toLinkedSet())
 
-        Backends.values().forEach {
-            val otherBackend = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
+        Storages.values().forEach {
+            val otherStorage = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
 
-            Assertions.assertTrue(backend.diff(otherBackend) == expectedResult)
+            Assertions.assertTrue(storage.diff(otherStorage) == expectedResult)
         }
     }
 
     @Test
-    fun diffToml_twoBackendsWithUniqueEntries_correctDiffBetweenBackends() {
-        val backend = Backends.TOML.get.also {
+    fun diffToml_twoStoragesWithUniqueEntries_correctDiffBetweenStorages() {
+        val storage = Storages.TOML.get.also {
             it["UNIQUE_ENTRY_1"] = "unique-entry-1"
         }
         val expectedResult = Pair(
                 listOf(ConfigOption("UNIQUE_ENTRY_2", "unique-entry-2")).toLinkedSet(),
                 listOf(ConfigOption("UNIQUE_ENTRY_1", "unique-entry-1")).toLinkedSet())
 
-        Backends.values().forEach {
-            val otherBackend = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
+        Storages.values().forEach {
+            val otherStorage = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
 
-            Assertions.assertTrue(backend.diff(otherBackend) == expectedResult)
+            Assertions.assertTrue(storage.diff(otherStorage) == expectedResult)
         }
     }
 
     @Test
-    fun diffKeepass_twoBackendsWithUniqueEntries_correctDiffBetweenBackends() {
-        val backend = Backends.KEEPASS.get.also {
+    fun diffKeepass_twoStoragesWithUniqueEntries_correctDiffBetweenStorages() {
+        val storage = Storages.KEEPASS.get.also {
             it["UNIQUE_ENTRY_1"] = "unique-entry-1"
         }
         val expectedResult = Pair(
                 listOf(ConfigOption("UNIQUE_ENTRY_2", "unique-entry-2")).toLinkedSet(),
                 listOf(ConfigOption("UNIQUE_ENTRY_1", "unique-entry-1")).toLinkedSet())
 
-        Backends.values().forEach {
-            val otherBackend = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
+        Storages.values().forEach {
+            val otherStorage = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
 
-            Assertions.assertTrue(backend.diff(otherBackend) == expectedResult)
+            Assertions.assertTrue(storage.diff(otherStorage) == expectedResult)
         }
     }
 
     @Test
-    fun diffSSM_twoBackendsWithUniqueEntries_correctDiffBetweenBackends() {
-        val backend = Backends.SSM.get.also {
+    fun diffSSM_twoStoragesWithUniqueEntries_correctDiffBetweenStorages() {
+        val storage = Storages.SSM.get.also {
             it["UNIQUE_ENTRY_1"] = "unique-entry-1"
         }
         val expectedResult = Pair(
                 listOf(ConfigOption("UNIQUE_ENTRY_2", "unique-entry-2")).toLinkedSet(),
                 listOf(ConfigOption("UNIQUE_ENTRY_1", "unique-entry-1")).toLinkedSet())
 
-        Backends.values().forEach {
-            val otherBackend = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
+        Storages.values().forEach {
+            val otherStorage = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
 
-            Assertions.assertTrue(backend.diff(otherBackend) == expectedResult)
+            Assertions.assertTrue(storage.diff(otherStorage) == expectedResult)
         }
     }
 
     @Test
-    fun updateFromPlain_twoBackendsWithUniqueEntries_firstBackendHasAllItsValuesAndValuesFromTheSecondBackend() {
-        Backends.values().forEach {
-            val backend = Backends.PLAIN.get.also { it["UNIQUE_ENTRY_1"] = "unique-entry-1" }
-            val otherBackend = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
-            val expectedResult = backend.list() + otherBackend.list()
+    fun updateFromPlain_twoStoragesWithUniqueEntries_firstStorageHasAllItsValuesAndValuesFromTheSecondStorage() {
+        Storages.values().forEach {
+            val storage = Storages.PLAIN.get.also { it["UNIQUE_ENTRY_1"] = "unique-entry-1" }
+            val otherStorage = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
+            val expectedResult = storage.list() + otherStorage.list()
 
-            backend.updateFrom(otherBackend)
+            storage.updateFrom(otherStorage)
 
-            Assertions.assertTrue(backend.list() == expectedResult)
+            Assertions.assertTrue(storage.list() == expectedResult)
         }
     }
 
     @Test
-    fun updateFromToml_twoBackendsWithUniqueEntries_firstBackendHasAllItsValuesAndValuesFromTheSecondBackend() {
-        Backends.values().forEach {
-            val backend = Backends.TOML.get.also { it["UNIQUE_ENTRY_1"] = "unique-entry-1" }
-            val otherBackend = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
-            val expectedResult = backend.list() + otherBackend.list()
+    fun updateFromToml_twoStoragesWithUniqueEntries_firstStorageHasAllItsValuesAndValuesFromTheSecondStorage() {
+        Storages.values().forEach {
+            val storage = Storages.TOML.get.also { it["UNIQUE_ENTRY_1"] = "unique-entry-1" }
+            val otherStorage = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
+            val expectedResult = storage.list() + otherStorage.list()
 
-            backend.updateFrom(otherBackend)
+            storage.updateFrom(otherStorage)
 
-            Assertions.assertTrue(backend.list() == expectedResult)
+            Assertions.assertTrue(storage.list() == expectedResult)
         }
     }
 
     @Test
-    fun updateFromKeepass_twoBackendsWithUniqueEntries_firstBackendHasAllItsValuesAndValuesFromTheSecondBackend() {
-        Backends.values().forEach {
+    fun updateFromKeepass_twoStoragesWithUniqueEntries_firstStorageHasAllItsValuesAndValuesFromTheSecondStorage() {
+        Storages.values().forEach {
 
-            val backend = Backends.KEEPASS.get.also { it["UNIQUE_ENTRY_1"] = "unique-entry-1" }
-            val otherBackend = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
-            val expectedResult = backend.list() + otherBackend.list()
+            val storage = Storages.KEEPASS.get.also { it["UNIQUE_ENTRY_1"] = "unique-entry-1" }
+            val otherStorage = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
+            val expectedResult = storage.list() + otherStorage.list()
 
-            backend.updateFrom(otherBackend)
+            storage.updateFrom(otherStorage)
 
-            Assertions.assertTrue(backend.list() == expectedResult)
+            Assertions.assertTrue(storage.list() == expectedResult)
         }
     }
 
     @Test
-    fun updateFromSSM_twoBackendsWithUniqueEntries_firstBackendHasAllItsValuesAndValuesFromTheSecondBackend() {
-        Backends.values().forEach {
-            val backend = Backends.SSM.get.also { it["UNIQUE_ENTRY_1"] = "unique-entry-1" }
-            val otherBackend = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
-            val expectedResult = backend.list() + otherBackend.list()
+    fun updateFromSSM_twoStoragesWithUniqueEntries_firstStorageHasAllItsValuesAndValuesFromTheSecondStorage() {
+        Storages.values().forEach {
+            val storage = Storages.SSM.get.also { it["UNIQUE_ENTRY_1"] = "unique-entry-1" }
+            val otherStorage = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
+            val expectedResult = storage.list() + otherStorage.list()
 
-            backend.updateFrom(otherBackend)
+            storage.updateFrom(otherStorage)
 
-            Assertions.assertTrue(backend.list() == expectedResult)
+            Assertions.assertTrue(storage.list() == expectedResult)
         }
     }
 }
