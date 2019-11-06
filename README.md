@@ -3,42 +3,133 @@
 
 # Parnas
 
-Parnas is a tool to manage configuration parameters stored in different backends.
-The tool can be extended with additional backends and outputs.
+**Parnas** is an extensible tool to manage configuration parameters that are kept in various storage systems.
 
 ![GIPHY](https://media.giphy.com/media/WryP8X3pfFkMR3gacz/giphy.gif)
 
+## Supported Storage Systems
+
+* Files
+* [TOML](https://en.wikipedia.org/wiki/TOML)
+* [KeePass](https://keepass.info) (kdbx)
+* [AWS Parameter Store](https://docs.aws.amazon.com/systems-manager/latest/userguide/systems-manager-parameter-store.html) (ssm)
+
 ## Installation
 
-The easiest way to get and start using Parnas is to download wrapper script, that will check and get fresh versions for you.
-Prerequisites for this script are: `java curl jq grep`
+Getting **Parnas** up and running is easy: download and run a wrapper script that will check your environment and install the latest suitable **Parnas** version.
+Wrapper script requires `java`, `curl`, `jq`, and `grep`.
 
-Commands to install the wrapper: 
+Commands to install:
 ```
 curl -s 'https://raw.githubusercontent.com/sndl/parnas/master/install.sh' -o ./install.sh
 chmod +x install.sh && ./install.sh && rm ./install.sh
 ```
-Restart your terminal, and you should be able to use `parnas` from the command line
+
+To finalize installation restart your terminal, and you should be able to use `parnas` from the command line.
 
 ## Configuration
 
-Configuration is done in INI formatted file, by default configuration is looked up in current working
-directory and named `parnas.conf`. Config file path can be changed by passing `--config` option during execution
+Parnas configuration is stored in an INI file `parnas.conf`, which default location is assumed to be the current working
+directory. If you want to use a different location, pass `--config` option to the script.
 
-Common configuration format:
+Configuration example:
+
 ```$ini
-[backend-name]
-tags = tag1, tag2, tag3
-type = backend-type
+[storage-name]
+    tags = tag1, tag2, tag3
+    type = storage-type
+    path = local-storage
 ```
 
-Example: 
+Where `storage-name` should be unique per configuration file.
+
+### Configuration parameters
+
+Applicable for any storage:
+
+* `type` possible values are `plain`, `toml`, `ssm`, `keepass`. This parameter is required for any storage
+* `tags` arbitrary string identifier that can be used for grouping and filtering purposes
+
+Applicable for `plain`:
+
+* `path` path to local file with configuration parameters (required)
+
+Applicable for `toml`:
+
+* `path` path to local file with configuration parameters (required)
+* `prefix` parameter hierarchy specifier (optional)
+
+Applicable for `ssm`:
+
+* `region` AWS region (required)
+* `profile`  AWS Account name (required)
+* `prefix` parameter hierarchy specifier. In AWS CLI it's `path` (optional)
+* `kms-key-id`  KMS key id for `SecureString` datatype (optional)
+* `separator-to-replace` when set then all `.` in uploaded keys will be replaced with `/` (optional)
+
+Applicable for `keepass`:
+
+* `path` path to local file with configuration parameters database (required)
+* `password` master key for `keepass` database (optional)
+* `password-from-file` key file for `keepass` database (optional)
+
+## Usage
+
+```
+parnas [OPTIONS...] <STORAGE|TAG> COMMAND [ARGS...]
+```
+
+### Options
+
+```
+-c, --config   Location of Parnas configuration file
+    --debug    Debug mode
+    --version  Show version number and quit
+-t, --by-tag   Tag that will be used to filter storage systems
+-h, --help     This help text
+-o, --output   Preferred output method: "pretty" or "silent"
+               Default is "pretty"
+```
+
+### Commands
+
+```
+get          Get a value by key
+set          Set specific value for a specific key, use --value option if you have value containing "="
+rm           Remove a parameter by key
+list         List all parameters
+diff         Print difference between two storages
+update-from  Updates all parameters that are not present or differ in this one storage storage to another
+destroy      Remove ALL parameters. IMPORTANT! This action cannot be reverted
+init         Initialize storage, i.e. create a database file (for "plain", "toml", or "keepass")
+```
+
+### Arguments
+
+```
+-f, --force            Attempt to remove/update parameters without confirmation
+                       Supported commands: update-from, destroy, rm, set
+    --value            Value of parameter
+                       Supported commands: set
+-p, --prefix           Parameter hierarchy that is applicable for ssm and toml storages
+                       Supported commands: update-from, diff, list
+    --permit-destroy   Permit to delete all parameters from storage
+                       Supported commands: destroy
+    --prevent-destroy  Protect parameters in storage from destroy
+                       Supported commands: destroy
+```
+
+## Usage examples
+
+Let's take a look at usage of Parnas with the following configuration file `parnas.conf`
+
 ```$ini
 [local1]
     type = plain
     path = local1.properties
 
 [local2]
+    tags = non-prod
     type = plain
     path = local2.properties
 
@@ -50,10 +141,7 @@ Example:
     tags = non-prod
     type = keepass
     path = keepass1.kdbx
-    password = somepassword # If not set app will try to read password from PARNAS_KEEPASS1_PASSWORD
-                            # If env variable is not set, it will try to read file name from "password-from-file" and then read file contents
-                            # If "password-from-file" is not set, it will try to read contents from file named .parnas_keepass1_password
-                            # If file does not exist, it will prompt for password
+    password = somepassword
 
 [ssm1]
     tags = prod
@@ -62,46 +150,69 @@ Example:
     profile = sandbox
     prefix = /sndl/parnas/test
     kms-key-id = 111a1aa1-a11a-1a1a-1aa1-1111111111a1
-    separator-to-replace = . # Can be absent, if set then all "." in uploaded keys will be replaced with "/"
+    separator-to-replace = .
 ```
 
-## Usage
+*List all parameters:*
+```
+parnas local1 list
+```
 
-Usage examples are based on example config above.
+*List all parameters by a prefix:*
+```
+parnas local1 list --prefix /prefix/example/
+```
 
-1. Help: `parnas --help`
-1. List all parameters: `parnas local1 list`
-1. List all parameters by a prefix: `parnas local1 list --prefix param`
-1. Set a parameter: `parnas local1 set newParamName newParamValue`
-1. Get a parameter: `parnas local1 get newParamName`
-1. Remove parameter: `parnas local1 rm newParamName`
-1. Diff between parameters in two backends: `parnas local1 diff ssm1`
-1. Remove ALL parameters in a backend, must pass `--permit-destroy` flag for command to succeed:
-`parnas local1 destroy --permit-destroy`
+*Set a parameter:*
+```
+parnas local1 set newParamName newParamValue
+```
+or
+```
+parnas local1 set newParamName --value newParamValue
+```
 
-Actions can be done on multiple backends by tag: `parnas --by-tag non-prod set newParamName2 newParamValue2`
+*Get a parameter:*
+```
+parnas local1 get newParamName
+```
 
-## Backends
-At the moment supported backends are:
-* Plain (properties format)
-* AWS SSM
-* KeePass (kdbx)
-* Toml
+*Update parameters from one storage to another:*
+```
+parnas ssm1 update-from local2
+```
+or
+```
+parnas ssm1 update-from local2 --force --silent
+```
 
-## Outputs
-At the moment supported output formats are:
-* Pretty
+*Remove parameter:*
+```
+parnas local1 rm newParamName
+```
 
-## Known Issues & Limitations
-* Only flat configs are supported for now, i.e. it is not possible to create SSM by-path configs, TOML sections work though
+*Diff between parameters in two storages:*
+```
+parnas keepass1 diff ssm1
+```
+
+*Remove ALL parameters in a storage, must pass `--permit-destroy` flag for command to succeed:*
+```
+parnas local1 destroy --permit-destroy
+```
+
+*Set parameter in multiple storages with the same tag:*
+```
+parnas --by-tag non-prod set newParamName2 newParamValue2
+```
 
 ## Roadmap
 * ~~Config validation~~ (Implemented)
-* ~~Sync parameters from one backend to another~~ (Implemented)
+* ~~Sync parameters from one storage to another~~ (Implemented)
 * ~~Secure config file or think about providing credentials a different way~~ (Implemented)
-* ~~Support tags and add ability to set parameters to multiple backends simultaneously~~ (Implemented)
+* ~~Support tags and add ability to set parameters to multiple storages simultaneously~~ (Implemented)
 * ~~Use GraalVM to build executable~~ (Not Implemented: due to problems with reflection)
-* Add Consul backend
+* Suppport Consul storage
 * Add JSON output
 * Add daemon mode and thin client in order to reuse SSM or any other remote storage connections
 
