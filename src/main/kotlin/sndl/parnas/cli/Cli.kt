@@ -20,8 +20,8 @@ import java.io.File
 import kotlin.system.exitProcess
 
 // TODO: to refactor - completely separate logic from output and CLI
-class Cli : CliktCommand(name = "parnas", help = "This is a command line tool that helps to manage configuration parameters in different storages") {
-    private val storageIdentifier: String by argument("BACKEND|TAG")
+class Cli : CliktCommand(name = "parnas", help = "This is an extensible tool to manage configuration parameters that are kept in various storage systems.") {
+    private val storageIdentifier: String by argument("STORAGE|TAG")
     private val configFile: File by option("-c", "--config",
             help = "Path to config file").file().default(File("parnas.conf"))
     private val outputMethod: String by option("-o", "--output",
@@ -64,9 +64,7 @@ abstract class Command(name: String, help: String = "") : CliktCommand(name = na
     val config: Config by lazy { configObjects.config }
 
     fun prompt(): Boolean {
-        echo("""Do you want to apply changes above?
-            |Only 'yes' or 'y' will be accepted
-        """.trimMargin())
+        echo("Do you want to apply these changes (y/n)?")
 
         val userResponse = System.console().readLine("Enter value: ")
 
@@ -84,7 +82,7 @@ class GetParam : Command("get", "Get value by key") {
     }
 }
 
-class SetParam : Command("set", "Set specific value for a specific key, use --value option if you have value with '=' sign") {
+class SetParam : Command("set", "Set specific value for a specific key, use --value option if you have value containing \"=\"") {
     private val key: String by argument()
     private val valueArg: String? by argument("VALUE").optional()
     /**
@@ -94,7 +92,7 @@ class SetParam : Command("set", "Set specific value for a specific key, use --va
      */
     private val valueOpt: String? by option("--value")
     private val force: Boolean by option("-f", "--force",
-            help = "Overwrites an existing parameter if this flag is applied").flag(default = false)
+            help = "Attempt to update parameter without confirmation").flag(default = false)
 
     override fun run() {
         val value = when {
@@ -125,10 +123,10 @@ class SetParam : Command("set", "Set specific value for a specific key, use --va
     }
 }
 
-class RmParam : Command("rm", "Remove parameter by key") {
+class RmParam : Command("rm", "Remove a parameter by key") {
     private val key: String by argument()
     private val force: Boolean by option("-f", "--force",
-            help = "Overwrites an existing parameter if this flag is applied").flag(default = false)
+            help = "Attempt to remove parameter without confirmation").flag(default = false)
 
     override fun run() {
         // TODO@sndl: return ConfigOption from delete method
@@ -196,10 +194,10 @@ class DestroyParam : Command(
      * For more details see documentation for boolean flags: https://ajalt.github.io/clikt/options/#boolean-flag-options
      */
     private val permitDestroy by option("--permit-destroy",
-            help = "Permits/Prevents complete removal of parameters.")
+            help = "Permits or prevents complete removal of parameters.")
             .flag("--prevent-destroy", default = false)
     private val force: Boolean by option("-f", "--force",
-            help = "Overwrites all existing parameters if this flag is applied").flag(default = false)
+            help = "Attempt to remove all parameters without confirmation").flag(default = false)
 
     //TODO: rewrite printDestroy()
     override fun run() {
@@ -230,13 +228,13 @@ class DestroyParam : Command(
 
 class UpdateParamFrom : Command(
         name = "update-from",
-        help = """Updates all parameters, that are not present or different in this storage,
+        help = """Updates all parameters that are not present or different in current storage 
         |with parameters from another storage.""".trimMargin()) {
 
     private val fromStorage: String by argument("<from-storage>")
     private val prefix by option("-p", "--prefix")
     private val force: Boolean by option("-f", "--force",
-            help = "Overwrites all existing parameters if this flag is applied").flag(default = false)
+            help = "Attempt to update all parameters without confirmation").flag(default = false)
 
     override fun run() {
         val otherStorage = config.getStorage(fromStorage)
@@ -262,7 +260,7 @@ class UpdateParamFrom : Command(
 
 class InitializeStorage : Command(
         name = "init",
-        help = "Initialize the storage, i.e. create database file"
+        help = "Initialize storage, i.e. create a database file (for \"plain\", \"toml\", or \"keepass\")"
 ) {
     override fun run() {
         storages.forEach {

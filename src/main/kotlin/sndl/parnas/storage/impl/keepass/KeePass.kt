@@ -23,7 +23,7 @@ class KeePass(name: String, path: String, password: String) : Storage(name) {
         KeepassClient(file, password)
     } catch (e: KeePassDatabaseUnreadableException) {
         logger.debug(e.message, e)
-        throw WrongSecret("An incorrect password for KeePass storage ($name)")
+        throw WrongSecret("Incorrect password for KeePass storage ($name)")
     }
 
     override val isInitialized: Boolean

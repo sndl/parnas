@@ -95,7 +95,7 @@ class SSM(name: String, ssmClient: AWSSimpleSystemsManagement,
      * Does nothing in context of SSM, because it cannot be initialized
      */
     override fun initialize() {
-        throw CannotInitializeStorage("There is no need to initialize storage of SSM type")
+        throw CannotInitializeStorage("SSM storage does not require initialization")
     }
 
     override fun list() = buildSet<ConfigOption> {

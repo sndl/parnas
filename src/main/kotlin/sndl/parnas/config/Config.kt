@@ -24,7 +24,7 @@ class Config(configFile: File) {
 
     private fun initStorage(name: String): Storage {
         val storageConfig = ini[name]?.apply { add("name", name) }
-                ?: throw ConfigurationException("configuration for the storage named \"$name\" is absent")
+                ?: throw ConfigurationException("configuration for storage \"$name\" is missing")
 
         return when (storageConfig["type"]) {
             "plain" -> Plain(name, storageConfig)
