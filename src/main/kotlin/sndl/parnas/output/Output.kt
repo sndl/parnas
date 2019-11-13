@@ -162,7 +162,7 @@ class SilentOutput : Output() {
 
     override fun printList(configOptions: LinkedHashSet<ConfigOption>, prefix: String?, storage: Storage) {
         echo(warnMessage)
-        echo("There are ${configOptions.size} parameters")
+        echo("Displaying ${configOptions.size} parameters")
     }
 
     override fun printDestroy(storage: Storage, configOptions: LinkedHashSet<ConfigOption>?) {
@@ -183,9 +183,9 @@ class SilentOutput : Output() {
     override fun printGet(key: String, value: String?, storage: Storage) {
         echo(warnMessage)
         echo(if (value == null) {
-            "The parameter doesn't exist"
+            "Parameter doesn’t exist"
         } else {
-            "The parameter exists"
+            "Parameter exists"
         })
     }
 }

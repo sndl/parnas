@@ -26,7 +26,7 @@ abstract class Storage(val name: String) {
      * @throws IllegalStateException -- is thrown when trying to destroy non-destroyable storage
      */
     open fun destroy() {
-        require(permitDestroy) { "Trying to destroy non-destroyable storage!" }
+        require(permitDestroy) { "Trying to destroy a protected storage!" }
 
         list().forEach {
             delete(it.key)

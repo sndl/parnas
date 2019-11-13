@@ -27,7 +27,7 @@ fun getConfigParameter(parameterName: String, storageConfig: Map<String, String>
                 ?: storageConfig["$parameterName-from-file"]?.let { getFileContentOrNull(it) }
                 ?: getFileContentOrNull(".parnas_${storageConfig.getValue("name")}_$parameterName")
                 ?: System.console()
-                        .readPassword("Please enter value for storage \"${storageConfig["name"]}\" parameter \"$parameterName\": ")
+                        .readPassword("Specify a value for storage \"${storageConfig["name"]}\" parameter \"$parameterName\": ")
                         .joinToString("")
                 ?: throw ParameterRequiredException(parameterName, storageConfig.getValue("type"))
     } else {
