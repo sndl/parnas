@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.1
+* Fix issue with NPE when receiving response to prompts on WSL (Windows Subsystem for Linux)
+* "y" is accepted as well as "yes" as a response to prompts
+* Renamed backend to storage, which makes more sense and match updated documentation
+* Documentation was updated along with help messages
+
 ## 0.2.0
 * Implement prompts for potentially destructive commands (set, rm, update-from, destroy)
 * Cover destroy, diff and updateFrom methods with unit tests
