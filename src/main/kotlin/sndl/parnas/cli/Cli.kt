@@ -17,6 +17,8 @@ import sndl.parnas.output.PrettyOutput
 import sndl.parnas.output.SilentOutput
 import sndl.parnas.utils.*
 import java.io.File
+import java.util.*
+import kotlin.collections.LinkedHashSet
 import kotlin.system.exitProcess
 
 // TODO: to refactor - completely separate logic from output and CLI
@@ -66,9 +68,14 @@ abstract class Command(name: String, help: String = "") : CliktCommand(name = na
     fun prompt(): Boolean {
         echo("Do you want to apply these changes (y/n)?")
 
-        val userResponse = System.console().readLine("Enter value: ")
+        echo("Enter value: ", false)
+        val userResponse = scanner.nextLine()
 
         return userResponse == "yes" || userResponse == "y"
+    }
+
+    companion object {
+        val scanner = Scanner(System.`in`)
     }
 }
 
