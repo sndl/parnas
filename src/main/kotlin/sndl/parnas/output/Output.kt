@@ -25,6 +25,8 @@ sealed class Output {
 
     abstract fun printUpdateFrom(oldParams: LinkedHashSet<ConfigOption>, updatedParams: LinkedHashSet<ConfigOption>,
                                  storage: Storage, otherStorage: Storage)
+
+    abstract fun printInfo(storage: Storage)
 }
 
 class PrettyOutput : Output() {
@@ -140,6 +142,10 @@ class PrettyOutput : Output() {
             echo("  ${decorateKey(it.key)}${" ".repeat(spacing)}= ${decorateValue(it.value)}")
         }
     }
+
+    override fun printInfo(storage: Storage) {
+        echo("${decorateStorage(storage.javaClass.simpleName.toLowerCase())}/${decorateStorage(storage.name)}")
+    }
 }
 
 /**
@@ -187,5 +193,9 @@ class SilentOutput : Output() {
         } else {
             "Parameter exists"
         })
+    }
+
+    override fun printInfo(storage: Storage) {
+        echo("${storage.javaClass.simpleName.toLowerCase()} ${(storage.name)}")
     }
 }

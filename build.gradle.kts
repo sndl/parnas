@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
 import tanvd.kosogor.proxy.shadowJar
 
 group = "sndl.parnas"
-version = "0.2.1"
+version = "0.2.1-SNAPSHOT"
 description = "PARameter Naming And Storing"
 
 plugins {

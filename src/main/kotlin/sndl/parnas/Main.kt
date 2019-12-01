@@ -31,7 +31,7 @@ fun main(args: Array<String>) {
             .subcommands(
                     GetParam(), SetParam(), RmParam(),
                     ListParam(), DiffParam(), UpdateParamFrom(),
-                    DestroyParam(), InitializeStorage()
+                    DestroyParam(), InitializeStorage(), Info()
             )
             .main(args)
 }

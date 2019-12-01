@@ -18,9 +18,13 @@ class Config(configFile: File) {
 
     fun getStorage(name: String) = storages.getOrPut(name) { initStorage(name) }
 
-    fun getStoragesByTag(tag: String) = ini.filter {
-        tag in it.value["tags"]?.split(",")?.map { it.trim() } ?: emptyList()
-    }.map { getStorage(it.key) }.toLinkedSet()
+    fun getStoragesByTag(tag: String): LinkedHashSet<Storage> {
+        return if (tag == "all") ini else {
+            ini.filter {
+                tag in it.value["tags"]?.split(",")?.map { it.trim() } ?: emptyList()
+            }
+        }.map { getStorage(it.key) }.toLinkedSet()
+    }
 
     private fun initStorage(name: String): Storage {
         val storageConfig = ini[name]?.apply { add("name", name) }

@@ -280,3 +280,11 @@ class InitializeStorage : Command(
     }
 }
 
+class Info: Command(name = "info", help = "Prints information about the storage") {
+    override fun run() {
+        storages.forEach {
+            output.printInfo(it)
+        }
+    }
+}
+
