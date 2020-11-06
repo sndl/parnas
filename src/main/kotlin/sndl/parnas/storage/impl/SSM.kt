@@ -1,6 +1,7 @@
 package sndl.parnas.storage.impl
 
 import com.amazonaws.auth.AWSCredentialsProviderChain
+import com.amazonaws.auth.EC2ContainerCredentialsProviderWrapper
 import com.amazonaws.auth.EnvironmentVariableCredentialsProvider
 import com.amazonaws.auth.profile.ProfileCredentialsProvider
 import com.amazonaws.regions.DefaultAwsRegionProviderChain
@@ -27,7 +28,8 @@ class SSM(name: String, ssmClient: AWSSimpleSystemsManagement,
                             .withRegion(region ?: DefaultAwsRegionProviderChain().region)
                             .withCredentials(AWSCredentialsProviderChain(
                                     EnvironmentVariableCredentialsProvider(),
-                                    profileName?.let { ProfileCredentialsProvider(it) }
+                                    profileName?.let { ProfileCredentialsProvider(it) },
+                                    EC2ContainerCredentialsProviderWrapper()
                             ))
                             .build(),
                     prefix = prefix,
