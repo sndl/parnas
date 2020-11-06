@@ -11,6 +11,9 @@ object TestContainersFactory {
 
     fun getLocalstack(services: String = "ssm"): KGenericContainer = KGenericContainer("localstack/localstack:$localstackVersion")
             .withExposedPorts(4566)
-            .waitingFor(HttpWaitStrategy().forPath("/health"))
+            .waitingFor(HttpWaitStrategy()
+                    .forPath("/health")
+                    .forStatusCode(200)
+                    .forResponsePredicate { it != "{}" })
             .withEnv("SERVICES", services).also { it.start() }
 }
