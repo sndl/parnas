@@ -23,7 +23,7 @@ class SSMTest {
     @ClassRule
     private val localstack = KGenericContainer("localstack/localstack:latest")
             .withExposedPorts(containerPort)
-            .withStartupTimeout(Duration.ofSeconds(60L))
+            .withStartupTimeout(Duration.ofSeconds(180L))
             .withEnv("SERVICES", "ssm").also { it.start() }
 
     private val ssmClient = AWSSimpleSystemsManagementClientBuilder.standard()
