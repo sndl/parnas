@@ -12,6 +12,7 @@ import org.apache.logging.log4j.core.config.Configurator
 import sndl.parnas.storage.Storage
 import sndl.parnas.storage.ConfigOption
 import sndl.parnas.config.Config
+import sndl.parnas.config.GlobalConfig
 import sndl.parnas.output.Output
 import sndl.parnas.output.PrettyOutput
 import sndl.parnas.output.SilentOutput
@@ -30,10 +31,16 @@ class Cli : CliktCommand(name = "parnas", help = "This is an extensible tool to 
             help = "Select preferred output method").choice("pretty", "silent").default("pretty")
     private val byTag by option("-t", "--by-tag").flag(default = false)
     private val debug by option("--debug").flag(default = false)
+    private val prompt by option ("--prompt",
+            help = "If flag is set than fallback to prompt for required config option will be performed").flag(default = false)
 
     data class ConfigObjects(val storage: LinkedHashSet<Storage>, val output: Output, val config: Config)
 
     override fun run() {
+        with(GlobalConfig) {
+            withPrompt = prompt
+        }
+
         if (debug) {
             Configurator.setRootLevel(Level.DEBUG)
         }

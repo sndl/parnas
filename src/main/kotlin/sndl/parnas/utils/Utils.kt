@@ -1,5 +1,6 @@
 package sndl.parnas.utils
 
+import sndl.parnas.config.GlobalConfig
 import java.io.File
 import java.io.FileNotFoundException
 import kotlin.system.exitProcess
@@ -26,9 +27,11 @@ fun getConfigParameter(parameterName: String, storageConfig: Map<String, String>
                 ?: System.getenv("PARNAS_${storageConfig.getValue("name").toUpperCase()}_${parameterName.toUpperCase()}")
                 ?: storageConfig["$parameterName-from-file"]?.let { getFileContentOrNull(it) }
                 ?: getFileContentOrNull(".parnas_${storageConfig.getValue("name")}_$parameterName")
-                ?: System.console()
-                        .readPassword("Specify a value for storage \"${storageConfig["name"]}\" parameter \"$parameterName\": ")
-                        .joinToString("")
+                ?: ifTrue(GlobalConfig.withPrompt) {
+                    System.console()
+                            .readPassword("Specify a value for storage \"${storageConfig["name"]}\" parameter \"$parameterName\": ")
+                            .joinToString("")
+                }
                 ?: throw ParameterRequiredException(parameterName, storageConfig.getValue("type"))
     } else {
         storageConfig[parameterName]
@@ -44,3 +47,5 @@ fun exitProcessWithMessage(status: Int, message: String): Nothing {
 fun getFileContentOrNull(path: String): String? = try { File(path).readText().trim() } catch (e: FileNotFoundException) { null }
 
 fun <T> Collection<T>.toLinkedSet() = LinkedHashSet(this)
+
+inline fun <T : Any> ifTrue(condition: Boolean, exec: () -> T?): T? = if (condition) exec() else null

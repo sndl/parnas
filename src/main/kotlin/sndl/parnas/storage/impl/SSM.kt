@@ -18,10 +18,10 @@ import java.lang.reflect.Proxy
 import kotlin.system.measureTimeMillis
 
 class SSM(name: String, ssmClient: AWSSimpleSystemsManagement,
-          var prefix: String, private val keyId: String, private val separatorToReplace: String? = null) : Storage(name) {
+          var prefix: String, private val kmsKeyId: String?, private val separatorToReplace: String? = null) : Storage(name) {
 
     constructor(name: String, region: String?, profileName: String?,
-                prefix: String, keyId: String, separatorToReplace: String? = null) :
+                prefix: String, keyId: String?, separatorToReplace: String? = null) :
             this(
                     name = name,
                     ssmClient = AWSSimpleSystemsManagementClientBuilder.standard()
@@ -33,7 +33,7 @@ class SSM(name: String, ssmClient: AWSSimpleSystemsManagement,
                             ))
                             .build(),
                     prefix = prefix,
-                    keyId = keyId,
+                    kmsKeyId = keyId,
                     separatorToReplace = separatorToReplace
             )
 
@@ -44,7 +44,7 @@ class SSM(name: String, ssmClient: AWSSimpleSystemsManagement,
                     region = try { getConfigParameter("region", config) } catch (e: ParameterRequiredException) { null },
                     profileName = try { getConfigParameter("profile", config) } catch (e: ParameterRequiredException) { null },
                     prefix = getConfigParameter("prefix", config),
-                    keyId = getConfigParameter("kms-key-id", config, true),
+                    keyId = try { getConfigParameter("kms-key-id", config, true) } catch (e: ParameterRequiredException) { null },
                     separatorToReplace = config["separator-to-replace"]
             )
 
@@ -55,11 +55,12 @@ class SSM(name: String, ssmClient: AWSSimpleSystemsManagement,
     private class SSMHandler(private val target: Any) : InvocationHandler {
         private var counter = 0
         private var executionTime = 0L
+        private val callsPerSecondThreshold = 40
 
         override fun invoke(proxy: Any, method: Method, args: Array<out Any>): Any {
             lateinit var result: Any
 
-            if (counter >= 40 && executionTime <= 1000) {
+            if (counter >= callsPerSecondThreshold && executionTime <= 1000) {
                 counter = 0
                 executionTime = 0
                 Thread.sleep(1000)
@@ -136,9 +137,14 @@ class SSM(name: String, ssmClient: AWSSimpleSystemsManagement,
         val request = PutParameterRequest()
                 .withName(fullKey)
                 .withValue(value)
-                .withType("SecureString")
-                .withKeyId(keyId)
                 .withOverwrite(true)
+                .apply {
+                    // TODO@sndl: support StringList type
+                    kmsKeyId?.let {
+                        withType("SecureString")
+                        withKeyId(it)
+                    } ?: withType("String")
+                }
 
         ssmClientProxy.putParameter(request)
 
