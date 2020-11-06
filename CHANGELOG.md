@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.2
+* Support plain `String` values for SSM
+* Support AWS authentication when running from AWS services (ECS, EC2, etc)
+* Implement info command to output information about backends
+
 ## 0.2.1
 * Fix issue with NPE when receiving response to prompts on WSL (Windows Subsystem for Linux)
 * "y" is accepted as well as "yes" as a response to prompts
