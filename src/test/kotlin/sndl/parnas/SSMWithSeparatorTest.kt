@@ -11,6 +11,7 @@ import sndl.parnas.storage.ConfigOption
 import sndl.parnas.storage.impl.SSM
 import sndl.parnas.utils.toLinkedSet
 import java.lang.IllegalArgumentException
+import java.time.Duration
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
@@ -23,6 +24,7 @@ class SSMWithSeparatorTest {
     @ClassRule
     private val localstack = KGenericContainer("localstack/localstack:latest")
             .withExposedPorts(containerPort)
+            .withStartupTimeout(Duration.ofSeconds(60L))
             .withEnv("SERVICES", "ssm").also { it.start() }
 
     private val ssmClient = AWSSimpleSystemsManagementClientBuilder.standard()

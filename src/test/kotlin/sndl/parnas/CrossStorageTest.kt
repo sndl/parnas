@@ -18,6 +18,7 @@ import sndl.parnas.storage.impl.Toml
 import sndl.parnas.storage.impl.keepass.KeePass
 import sndl.parnas.utils.toLinkedSet
 import java.io.File
+import java.time.Duration
 import java.util.UUID.randomUUID
 
 class CrossStorageTest {
@@ -60,6 +61,7 @@ class CrossStorageTest {
         @ClassRule
         private val localstack = KGenericContainer("localstack/localstack:latest")
                 .withExposedPorts(containerPort)
+                .withStartupTimeout(Duration.ofSeconds(60L))
                 .withEnv("SERVICES", "ssm").also { it.start() }
 
         private val ssmClient = AWSSimpleSystemsManagementClientBuilder.standard()
