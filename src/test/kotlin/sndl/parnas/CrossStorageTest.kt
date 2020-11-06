@@ -18,7 +18,6 @@ import sndl.parnas.storage.impl.Toml
 import sndl.parnas.storage.impl.keepass.KeePass
 import sndl.parnas.utils.toLinkedSet
 import java.io.File
-import java.time.Duration
 import java.util.UUID.randomUUID
 
 class CrossStorageTest {
@@ -55,19 +54,14 @@ class CrossStorageTest {
     }
 
     companion object {
-        private const val containerPort = 4583
         private const val awsRegion = "eu-west-1"
 
         @ClassRule
-        private val localstack = KGenericContainer("localstack/localstack:latest")
-                .withExposedPorts(containerPort)
-                .withStartupTimeout(Duration.ofSeconds(60L))
-                .withEnv("SERVICES", "ssm").also { it.start() }
-
+        private val localstack = TestContainersFactory.getLocalstack()
         private val ssmClient = AWSSimpleSystemsManagementClientBuilder.standard()
                 .withEndpointConfiguration(AwsClientBuilder
                         .EndpointConfiguration(
-                                "http://${localstack.containerIpAddress}:${localstack.getMappedPort(containerPort)}",
+                                "http://${localstack.containerIpAddress}:${localstack.firstMappedPort}",
                                 awsRegion))
                 .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials("dummy", "dummy")))
                 .build()

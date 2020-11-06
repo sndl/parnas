@@ -11,26 +11,20 @@ import sndl.parnas.storage.ConfigOption
 import sndl.parnas.storage.impl.SSM
 import sndl.parnas.utils.toLinkedSet
 import java.lang.IllegalArgumentException
-import java.time.Duration
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SSMWithSeparatorTest {
     companion object {
-        private const val containerPort = 4583
         private const val awsRegion = "eu-west-1"
     }
 
     @ClassRule
-    private val localstack = KGenericContainer("localstack/localstack:latest")
-            .withExposedPorts(containerPort)
-            .withStartupTimeout(Duration.ofSeconds(60L))
-            .withEnv("SERVICES", "ssm").also { it.start() }
-
+    private val localstack = TestContainersFactory.getLocalstack()
     private val ssmClient = AWSSimpleSystemsManagementClientBuilder.standard()
             .withEndpointConfiguration(AwsClientBuilder
                     .EndpointConfiguration(
-                            "http://${localstack.containerIpAddress}:${localstack.getMappedPort(containerPort)}",
+                            "http://${localstack.containerIpAddress}:${localstack.firstMappedPort}",
                             awsRegion))
             .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials("dummy", "dummy")))
             .build()
