@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.3
+* Update dependencies
+
 ## 0.2.2
 * Support plain `String` values for SSM
 * Support AWS authentication when running from AWS services (ECS, EC2, etc)
