@@ -6,7 +6,7 @@ jobs:
     working_directory: ~
     steps:
       - checkout
-      - run: ./gradlew build --stacktrace -Dorg.gradle.java.home=/usr/lib/jvm/java-8-openjdk-amd64
+      - run: ./gradlew build --stacktrace -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64
       - store_test_results:
           path: build/parnas/test-results
   release:
@@ -15,7 +15,7 @@ jobs:
     working_directory: ~
     steps:
       - checkout
-      - run: ./gradlew githubRelease -Dorg.gradle.java.home=/usr/lib/jvm/java-8-openjdk-amd64
+      - run: ./gradlew githubRelease -Dorg.gradle.java.home=/usr/lib/jvm/java-17-openjdk-amd64
 
 workflows:
   version: 2
