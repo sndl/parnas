@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
 import tanvd.kosogor.proxy.shadowJar
 
 group = "sndl.parnas"
-version = "0.2.2"
+version = "0.2.3-SNAPSHOT"
 description = "PARameter Naming And Storing"
 
 plugins {
@@ -20,20 +20,21 @@ repositories {
 
 dependencies {
     compile("de.slackspace", "openkeepass", "0.8.2")
-    compile("com.amazonaws", "aws-java-sdk-ssm", "1.11.555")
-    compile("com.electronwill.night-config", "toml", "3.5.0")
-    compile("com.electronwill.night-config", "core", "3.5.0")
+    compile("com.amazonaws", "aws-java-sdk-ssm", "1.12.239")
+    compile("com.electronwill.night-config", "toml", "3.6.5")
+    compile("com.electronwill.night-config", "core", "3.6.5")
 
+    // TODO: update clikt to a major release 3.5.0
     compile("com.github.ajalt", "clikt", "1.6.0")
-    compile("com.github.ajalt", "mordant", "1.2.0")
+    compile("com.github.ajalt", "mordant", "1.2.1")
 
     compile("org.ini4j", "ini4j", "0.5.4")
-    compile("org.apache.logging.log4j", "log4j-core", "2.12.1")
-    compile("org.apache.logging.log4j", "log4j-slf4j-impl", "2.12.1")
+    compile("org.apache.logging.log4j", "log4j-core", "2.17.1")
+    compile("org.apache.logging.log4j", "log4j-slf4j-impl", "2.17.1")
 
-    testCompile("org.junit.jupiter", "junit-jupiter-api", "5.4.1")
-    testRuntime("org.junit.jupiter", "junit-jupiter-engine", "5.4.1")
-    testCompile("org.testcontainers", "testcontainers", "1.10.6")
+    testCompile("org.junit.jupiter", "junit-jupiter-api", "5.8.2")
+    testRuntime("org.junit.jupiter", "junit-jupiter-engine", "5.8.2")
+    testCompile("org.testcontainers", "testcontainers", "1.17.2")
 }
 
 tasks.withType<KotlinJvmCompile> {
