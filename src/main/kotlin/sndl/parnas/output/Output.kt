@@ -62,7 +62,7 @@ class PrettyOutput : Output() {
     }
 
     override fun printDestroy(storage: Storage, configOptions: LinkedHashSet<ConfigOption>?) {
-        val longestKey = configOptions?.map { it.key }?.maxBy { it.length }?.length ?: 0
+        val longestKey = configOptions?.map { it.key }?.maxByOrNull { it.length }?.length ?: 0
 
         echo("${decorateStorage(storage.name)}/${decorateKey("*")}:")
         configOptions?.forEach {
@@ -87,7 +87,7 @@ class PrettyOutput : Output() {
                 }
 
         val longestKey = (intersection.keys + storageParams.map { it.key } + otherStorageParams.map { it.key })
-                .maxBy { it.length }?.length
+                .maxByOrNull { it.length }?.length
 
         echo("${decorateStorage(storage.name)}~${decorateStorage(otherStorage.name)}/" +
                 "${decorateKey("${prefix.toStringOrEmpty()}*")}:")
@@ -135,7 +135,7 @@ class PrettyOutput : Output() {
     }
 
     private fun printConfigOptionSet(configSet: LinkedHashSet<ConfigOption>) {
-        val longestKey = configSet.maxBy { it.key.length }
+        val longestKey = configSet.maxByOrNull { it.key.length }
 
         configSet.sortedBy { it.key }.forEach {
             val spacing = longestKey!!.key.length - it.key.length + 1
@@ -144,7 +144,7 @@ class PrettyOutput : Output() {
     }
 
     override fun printInfo(storage: Storage) {
-        echo("${decorateStorage(storage.javaClass.simpleName.toLowerCase())}/${decorateStorage(storage.name)}")
+        echo("${decorateStorage(storage.javaClass.simpleName.lowercase())}/${decorateStorage(storage.name)}")
     }
 }
 
@@ -196,6 +196,6 @@ class SilentOutput : Output() {
     }
 
     override fun printInfo(storage: Storage) {
-        echo("${storage.javaClass.simpleName.toLowerCase()} ${(storage.name)}")
+        echo("${storage.javaClass.simpleName.lowercase()} ${(storage.name)}")
     }
 }

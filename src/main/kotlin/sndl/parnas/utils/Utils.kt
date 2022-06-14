@@ -24,7 +24,7 @@ fun <T> buildSet(body: LinkedHashSet<T>.() -> Unit): LinkedHashSet<T> {
 fun getConfigParameter(parameterName: String, storageConfig: Map<String, String>, fallback: Boolean = false): String {
     return if (fallback) {
         storageConfig[parameterName]
-                ?: System.getenv("PARNAS_${storageConfig.getValue("name").toUpperCase()}_${parameterName.toUpperCase()}")
+                ?: System.getenv("PARNAS_${storageConfig.getValue("name").uppercase()}_${parameterName.uppercase()}")
                 ?: storageConfig["$parameterName-from-file"]?.let { getFileContentOrNull(it) }
                 ?: getFileContentOrNull(".parnas_${storageConfig.getValue("name")}_$parameterName")
                 ?: ifTrue(GlobalConfig.withPrompt) {

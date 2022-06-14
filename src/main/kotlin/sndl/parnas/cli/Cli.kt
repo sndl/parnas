@@ -62,7 +62,7 @@ class Cli : CliktCommand(name = "parnas", help = "This is an extensible tool to 
             else -> throw ConfigurationException("\"$outputMethod\" output is not supported")
         }
 
-        context.obj = ConfigObjects(storages, output, config)
+        currentContext.obj = ConfigObjects(storages, output, config)
     }
 }
 

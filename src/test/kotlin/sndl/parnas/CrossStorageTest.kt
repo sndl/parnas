@@ -18,34 +18,37 @@ import sndl.parnas.storage.impl.Toml
 import sndl.parnas.storage.impl.keepass.KeePass
 import sndl.parnas.utils.toLinkedSet
 import java.io.File
+import java.util.*
 import java.util.UUID.randomUUID
 
 class CrossStorageTest {
     enum class Storages {
         PLAIN {
             override val get
-                get() = Plain("plain-test", "/tmp/parnas-${this.name.toLowerCase()}/${randomUUID()}.properties").also {
+                get() = Plain("plain-test", "/tmp/parnas-${this.name.lowercase()}/${randomUUID()}.properties").also {
                     it.initialize()
                     it["COMMON_ENTRY"] = "common-entry"
                 }
         },
         KEEPASS {
             override val get
-                get() = KeePass("keepass-test", "/tmp/parnas-${this.name.toLowerCase()}/${randomUUID()}.kdbx", "test1234").also {
+                get() = KeePass("keepass-test",
+                    "/tmp/parnas-${this.name.lowercase(Locale.getDefault())}/${randomUUID()}.kdbx", "test1234").also {
                     it.initialize()
                     it["COMMON_ENTRY"] = "common-entry"
                 }
         },
         TOML {
             override val get
-                get() = Toml("toml-test", "/tmp/parnas-${this.name.toLowerCase()}/${randomUUID()}.toml").also {
+                get() = Toml("toml-test", "/tmp/parnas-${this.name.lowercase(Locale.getDefault())}/${randomUUID()}.toml").also {
                     it.initialize()
                     it["COMMON_ENTRY"] = "common-entry"
                 }
         },
         SSM {
             override val get
-                get() = SSM("ssm-test", ssmClient, "/tmp/parnas-${this.name.toLowerCase()}/${randomUUID()}/", "1111").also {
+                get() = SSM("ssm-test", ssmClient,
+                    "/tmp/parnas-${this.name.lowercase(Locale.getDefault())}/${randomUUID()}/", "1111").also {
                     it["COMMON_ENTRY"] = "common-entry"
                 }
         };
@@ -71,7 +74,7 @@ class CrossStorageTest {
         @BeforeAll
         fun createTestDirectory() {
             Storages.values().forEach {
-                File("/tmp/parnas-${it.name.toLowerCase()}").mkdir()
+                File("/tmp/parnas-${it.name.lowercase(Locale.getDefault())}").mkdir()
             }
         }
 
@@ -79,7 +82,7 @@ class CrossStorageTest {
         @AfterAll
         fun cleanupTestStorage() {
             Storages.values().forEach {
-                FileUtils.deleteDirectory(File("/tmp/parnas-${it.name.toLowerCase()}"))
+                FileUtils.deleteDirectory(File("/tmp/parnas-${it.name.lowercase(Locale.getDefault())}"))
             }
         }
     }
