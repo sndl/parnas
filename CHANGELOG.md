@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.2.4 
 * Support deletion of multiple parameters
 
 ## 0.2.3
