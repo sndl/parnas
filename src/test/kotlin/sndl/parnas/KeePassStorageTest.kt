@@ -16,6 +16,7 @@ class KeePassStorageTest {
                 it.initialize()
                 it["FIRST_ENTRY"] = "first-entry"
                 it["SECOND_ENTRY"] = "second-entry"
+                it["THIRD_ENTRY"] = "third-entry"
             }
 
         @JvmStatic
@@ -41,7 +42,8 @@ class KeePassStorageTest {
         val list = storage.list()
         val expectedList = setOf(
                 ConfigOption("FIRST_ENTRY", "first-entry"),
-                ConfigOption("SECOND_ENTRY", "second-entry")
+                ConfigOption("SECOND_ENTRY", "second-entry"),
+                ConfigOption("THIRD_ENTRY", "third-entry")
         )
 
         Assertions.assertEquals(expectedList, list)
@@ -54,7 +56,7 @@ class KeePassStorageTest {
 
     @Test
     fun get_entryDoesNotExist_gotNull() {
-        Assertions.assertNull(storage["THIRD_ENTRY"])
+        Assertions.assertNull(storage["FOURTH_ENTRY"])
     }
 
     @Test
@@ -74,7 +76,7 @@ class KeePassStorageTest {
         val testStorage = storage
         val beforeSize = testStorage.list().size
 
-        testStorage["THIRD_ENTRY"] = "third-entry"
+        testStorage["FOURTH_ENTRY"] = "fourth-entry"
 
         val afterSize = testStorage.list().size
 
@@ -98,6 +100,15 @@ class KeePassStorageTest {
         val testStorage = storage
         testStorage.delete("FIRST_ENTRY")
         Assertions.assertNull(testStorage["FIRST_ENTRY"])
+    }
+
+    @Test
+    fun deleteMultipleEntries_entriesExist_entriesDoNotExist() {
+        val testStorage = storage
+        testStorage.delete("FIRST_ENTRY", "SECOND_ENTRY")
+        Assertions.assertNull(testStorage["FIRST_ENTRY"])
+        Assertions.assertNull(testStorage["SECOND_ENTRY"])
+        Assertions.assertEquals(testStorage["THIRD_ENTRY"], ConfigOption("THIRD_ENTRY", "third-entry"))
     }
 
     @Test

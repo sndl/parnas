@@ -130,6 +130,19 @@ class TomlStorageTest {
     }
 
     @Test
+    fun deleteMultipleEntries_entriesExist_entriesDoNotExist() {
+        val testStorage = storage
+        val expectedList = setOf(
+            ConfigOption("SECTION1.FIRST_ENTRY", "section1-first-entry"),
+            ConfigOption("SECTION1.SUBSECTION1.FIRST_ENTRY", "section1-subsection1-first-entry"),
+            ConfigOption("SECTION1.SUBSECTION1.SUBSECTION2.FIRST_ENTRY", "section1-subsection1-subsection2-first-entry")
+        )
+
+        testStorage.delete("FIRST_ENTRY", "SECOND_ENTRY")
+        Assertions.assertEquals(testStorage.list(), expectedList)
+    }
+
+    @Test
     fun delete_entryExists_exactlyOneEntryIsRemoved() {
         val testStorage = storage
         val sizeBefore = testStorage.list().size

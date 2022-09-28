@@ -3,6 +3,7 @@ package sndl.parnas.cli
 import com.github.ajalt.clikt.core.CliktCommand
 import com.github.ajalt.clikt.core.requireObject
 import com.github.ajalt.clikt.parameters.arguments.argument
+import com.github.ajalt.clikt.parameters.arguments.multiple
 import com.github.ajalt.clikt.parameters.arguments.optional
 import com.github.ajalt.clikt.parameters.options.*
 import com.github.ajalt.clikt.parameters.types.choice
@@ -137,26 +138,29 @@ class SetParam : Command("set", "Set specific value for a specific key, use --va
     }
 }
 
-class RmParam : Command("rm", "Remove a parameter by key") {
-    private val key: String by argument()
+class RmParam : Command("rm", "Remove a parameter or multiple parameters by key") {
+    private val keys: List<String> by argument().multiple()
     private val force: Boolean by option("-f", "--force",
             help = "Attempt to remove parameter without confirmation").flag(default = false)
 
     override fun run() {
         // TODO@sndl: return ConfigOption from delete method
-        storages.forEach {
-            require(it.isInitialized) {
-                exitProcessWithMessage(1, "ERROR: storage \"${it.name}\" is not initialized")
+        storages.forEach { storage ->
+            require(storage.isInitialized) {
+                exitProcessWithMessage(1, "ERROR: storage \"${storage.name}\" is not initialized")
             }
 
-            val oldValue = it[key]?.value
-            output.printRm(key, oldValue, it)
+            val values = keys.map { key ->
+                storage[key]?.value.also {
+                    output.printRm(key, it, storage)
+                }
+            }
 
-            if (oldValue != null) {
+            if (values.any { it != null }) {
                 require(force || (output.interactive && prompt())) { exitProcessWithMessage(1, "WARNING: Changes were not applied") }
             }
 
-            it.delete(key)
+            storage.delete(*keys.toTypedArray())
         }
     }
 }

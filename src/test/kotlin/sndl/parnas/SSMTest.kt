@@ -105,6 +105,15 @@ class SSMTest {
     }
 
     @Test
+    fun deleteMultipleEntries_entriesExist_entriesDoNotExist() {
+        val testStorage = storage
+        testStorage.delete("FIRST_ENTRY", "SECOND_ENTRY")
+        Assertions.assertNull(testStorage["FIRST_ENTRY"])
+        Assertions.assertNull(testStorage["SECOND_ENTRY"])
+        Assertions.assertEquals(testStorage["ENTRY_PREFIX/THIRD_ENTRY"], ConfigOption("ENTRY_PREFIX/THIRD_ENTRY", "third-entry"))
+    }
+
+    @Test
     fun delete_entryExists_exactlyOneEntryIsRemoved() {
         val testStorage = storage
         val sizeBefore = testStorage.list().size

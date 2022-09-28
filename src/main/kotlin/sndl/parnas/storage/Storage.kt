@@ -17,6 +17,12 @@ abstract class Storage(val name: String) {
     // TODO@sndl: add namespace (lookup redis key)?
     abstract fun delete(key: String)
 
+    fun delete(vararg keys: String) {
+        keys.forEach {
+            delete(it)
+        }
+    }
+
     /** A method to initialize a storage, i.e. create a storage file */
     abstract fun initialize()
 

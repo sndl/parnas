@@ -1,5 +1,8 @@
 # Changelog
 
+## Unreleased
+* Support deletion of multiple parameters
+
 ## 0.2.3
 * Update dependencies
 
