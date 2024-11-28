@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.5, 0.2.6
+* Minor version update for some libraries
+
 ## 0.2.4 
 * Support deletion of multiple parameters
 

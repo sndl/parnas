@@ -4,7 +4,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
 import tanvd.kosogor.proxy.shadowJar
 
 group = "sndl.parnas"
-version = "0.2.5"
+version = "0.2.6"
 description = "PARameter Naming And Storing"
 
 plugins {
@@ -23,7 +23,7 @@ dependencies {
         exclude("org.simpleframework", "simple-xml")
     }
     implementation("com.carrotsearch.thirdparty", "simple-xml-safe", "2.7.1")
-    implementation("com.amazonaws", "aws-java-sdk-ssm", "1.12.239")
+    implementation("com.amazonaws", "aws-java-sdk-ssm", "1.12.779")
     implementation("com.electronwill.night-config", "toml", "3.6.5")
     implementation("com.electronwill.night-config", "core", "3.6.5")
 
