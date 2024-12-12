@@ -1,66 +1,67 @@
 package sndl.parnas.storage.impl.keepass
 
-import de.slackspace.openkeepass.KeePassDatabase
-import de.slackspace.openkeepass.domain.*
-import de.slackspace.openkeepass.domain.zipper.GroupZipper
+import org.linguafranca.pwdb.kdbx.KdbxCreds
+import org.linguafranca.pwdb.kdbx.dom.DomDatabaseWrapper
+import org.linguafranca.pwdb.kdbx.dom.DomEntryWrapper
+import org.linguafranca.pwdb.kdbx.dom.DomGroupWrapper
 import java.io.File
-import java.io.FileOutputStream
-
 
 class KeepassClient(private val databaseFile: File, private val masterPassword: String) {
     companion object {
-        private const val rootGroupName = "Root"
+        private const val ROOT_GROUP_NAME = "Root"
     }
 
-    private lateinit var database: KeePassFile
+    private lateinit var database: DomDatabaseWrapper
 
     init {
-        if (databaseFile.exists()) database = KeePassDatabase.getInstance(databaseFile).openDatabase(masterPassword)
+        val credentials = KdbxCreds(masterPassword.toByteArray())
+        if (databaseFile.exists()) database = DomDatabaseWrapper.load(credentials, databaseFile.inputStream())
     }
 
-    private val rootGroup
-        get() = database.getGroupByName(rootGroupName)
+    data class KeepassEntry(val title: String, val password: String)
 
-    data class KeepassEntry(val password: String)
+    private fun saveDB() {
+        database.save(KdbxCreds(masterPassword.toByteArray()), databaseFile.outputStream())
+    }
 
-    fun createDb(): KeePassFile {
-        database = KeePassFileBuilder(databaseFile.toString())
-                .addTopGroups(GroupBuilder()
-                        .addGroup(GroupBuilder().name(rootGroupName).build())
-                        .build()
-                ).build()
-        KeePassDatabase.write(database, masterPassword, FileOutputStream(databaseFile))
+    private fun findEntryByTitle(title: String): DomEntryWrapper? {
+        return database.findEntries { it.title == title }.firstOrNull()
+    }
 
+    fun createDb(): DomDatabaseWrapper {
+        databaseFile.createNewFile()
+        database = DomDatabaseWrapper().also {
+            it.newGroup(ROOT_GROUP_NAME)
+        }
+        saveDB()
         return database
     }
 
     fun findByTitle(title: String): KeepassEntry? {
-        return database.getEntryByTitle(title)?.let { KeepassEntry(it.password) }
+        return findEntryByTitle(title)?.let { KeepassEntry(it.title, it.password) }
     }
 
-    fun list(): List<Entry>? {
-        return rootGroup.entries
+    fun list(): List<KeepassEntry> {
+        return database.rootGroup.entries.map { KeepassEntry(it.title, it.password) }
     }
 
-    fun deleteEntry(title: String) = updateDb { removeEntry(database.getEntryByTitle(title)) }
+    fun deleteEntry(title: String): Unit = updateDb {
+        findEntryByTitle(title)?.let { removeEntry(it) }
+    }
 
     fun setEntry(title: String, value: String) {
         deleteEntry(title)
 
-        return updateDb {
-            addEntry(EntryBuilder().title(title).password(value).build())
+        updateDb {
+            val newEntry = database.newEntry(title).apply {
+                password = value
+            }
+            addEntry(newEntry)
         }
     }
 
-    private fun <T> updateDb(body: GroupBuilder.() -> T): T {
-        var result: T
-        val group = GroupBuilder(rootGroup).apply { result = body() }.build()
-        val updatedDatabase = GroupZipper(database).replace(group).close()
-
-        databaseFile.delete()
-        KeePassDatabase.write(updatedDatabase, masterPassword, FileOutputStream(databaseFile))
-        database = KeePassDatabase.getInstance(databaseFile).openDatabase(masterPassword)
-
-        return result
+    private fun updateDb(body: DomGroupWrapper.() -> Unit) {
+        database.rootGroup.body()
+        saveDB()
     }
 }

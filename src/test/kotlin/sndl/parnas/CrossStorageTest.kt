@@ -1,15 +1,11 @@
 package sndl.parnas
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider
-import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.client.builder.AwsClientBuilder
-import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder
 import org.junit.ClassRule
 import org.junit.jupiter.api.AfterAll
 import org.junit.jupiter.api.Assertions
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 import org.testcontainers.shaded.org.apache.commons.io.FileUtils
+import sndl.parnas.TestUtils.tmpFilePath
 import sndl.parnas.storage.Storage
 import sndl.parnas.storage.ConfigOption
 import sndl.parnas.storage.impl.Plain
@@ -25,7 +21,7 @@ class CrossStorageTest {
     enum class Storages {
         PLAIN {
             override val get
-                get() = Plain("plain-test", "/tmp/parnas-${this.name.lowercase()}/${randomUUID()}.properties").also {
+                get() = Plain("plain-test", tmpFilePath("parnas-${name.lowercase()}/${randomUUID()}.properties")).also {
                     it.initialize()
                     it["COMMON_ENTRY"] = "common-entry"
                 }
@@ -33,23 +29,28 @@ class CrossStorageTest {
         KEEPASS {
             override val get
                 get() = KeePass("keepass-test",
-                    "/tmp/parnas-${this.name.lowercase(Locale.getDefault())}/${randomUUID()}.kdbx", "test1234").also {
+                    tmpFilePath("parnas-${name.lowercase(Locale.getDefault())}/${randomUUID()}.kdbx"), "test1234").also {
                     it.initialize()
                     it["COMMON_ENTRY"] = "common-entry"
                 }
         },
         TOML {
             override val get
-                get() = Toml("toml-test", "/tmp/parnas-${this.name.lowercase(Locale.getDefault())}/${randomUUID()}.toml").also {
+                get() = Toml("toml-test", tmpFilePath("parnas-${name.lowercase(Locale.getDefault())}/${randomUUID()}.toml")).also {
                     it.initialize()
                     it["COMMON_ENTRY"] = "common-entry"
                 }
         },
         SSM {
-            override val get
-                get() = SSM("ssm-test", ssmClient,
-                    "/tmp/parnas-${this.name.lowercase(Locale.getDefault())}/${randomUUID()}/", "1111").also {
-                    it["COMMON_ENTRY"] = "common-entry"
+            override val get: SSM
+                get() {
+                    // Fix prefix for WindowsPath
+                    val paramPath = tmpFilePath("parnas-${name.lowercase(Locale.getDefault())}/${randomUUID()}/")
+                        .replace('\\', '/')
+                        .substringAfter(':')
+                    return SSM("ssm-test", ssmClient, paramPath, "1111").also {
+                        it["COMMON_ENTRY"] = "common-entry"
+                    }
                 }
         };
 
@@ -57,32 +58,15 @@ class CrossStorageTest {
     }
 
     companion object {
-        private const val awsRegion = "eu-west-1"
-
         @ClassRule
         private val localstack = TestContainersFactory.getLocalstack()
-        private val ssmClient = AWSSimpleSystemsManagementClientBuilder.standard()
-                .withEndpointConfiguration(AwsClientBuilder
-                        .EndpointConfiguration(
-                                "http://${localstack.containerIpAddress}:${localstack.firstMappedPort}",
-                                awsRegion))
-                .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials("dummy", "dummy")))
-                .build()
-
-
-        @JvmStatic
-        @BeforeAll
-        fun createTestDirectory() {
-            Storages.values().forEach {
-                File("/tmp/parnas-${it.name.lowercase(Locale.getDefault())}").mkdir()
-            }
-        }
+        private val ssmClient = TestUtils.buildClient(localstack)
 
         @JvmStatic
         @AfterAll
         fun cleanupTestStorage() {
-            Storages.values().forEach {
-                FileUtils.deleteDirectory(File("/tmp/parnas-${it.name.lowercase(Locale.getDefault())}"))
+            Storages.entries.forEach {
+                FileUtils.deleteDirectory(File(tmpFilePath("parnas-${it.name.lowercase(Locale.getDefault())}")))
             }
         }
     }
@@ -96,7 +80,7 @@ class CrossStorageTest {
                 listOf(ConfigOption("UNIQUE_ENTRY_2", "unique-entry-2")).toLinkedSet(),
                 listOf(ConfigOption("UNIQUE_ENTRY_1", "unique-entry-1")).toLinkedSet())
 
-        Storages.values().forEach {
+        Storages.entries.forEach {
             val otherStorage = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
 
             Assertions.assertTrue(storage.diff(otherStorage) == expectedResult)
@@ -112,10 +96,10 @@ class CrossStorageTest {
                 listOf(ConfigOption("UNIQUE_ENTRY_2", "unique-entry-2")).toLinkedSet(),
                 listOf(ConfigOption("UNIQUE_ENTRY_1", "unique-entry-1")).toLinkedSet())
 
-        Storages.values().forEach {
+        Storages.entries.forEach {
             val otherStorage = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
 
-            Assertions.assertTrue(storage.diff(otherStorage) == expectedResult)
+            Assertions.assertEquals(expectedResult, storage.diff(otherStorage), "Failed to compare ${storage.name} and ${otherStorage.name}")
         }
     }
 
@@ -128,10 +112,10 @@ class CrossStorageTest {
                 listOf(ConfigOption("UNIQUE_ENTRY_2", "unique-entry-2")).toLinkedSet(),
                 listOf(ConfigOption("UNIQUE_ENTRY_1", "unique-entry-1")).toLinkedSet())
 
-        Storages.values().forEach {
+        Storages.entries.forEach {
             val otherStorage = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
 
-            Assertions.assertTrue(storage.diff(otherStorage) == expectedResult)
+            Assertions.assertEquals(storage.diff(otherStorage), expectedResult, "Failed to compare ${storage.name} and ${otherStorage.name}")
         }
     }
 
@@ -144,16 +128,16 @@ class CrossStorageTest {
                 listOf(ConfigOption("UNIQUE_ENTRY_2", "unique-entry-2")).toLinkedSet(),
                 listOf(ConfigOption("UNIQUE_ENTRY_1", "unique-entry-1")).toLinkedSet())
 
-        Storages.values().forEach {
+        Storages.entries.forEach {
             val otherStorage = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
 
-            Assertions.assertTrue(storage.diff(otherStorage) == expectedResult)
+            Assertions.assertEquals(storage.diff(otherStorage), expectedResult, "Failed to compare ${storage.name} and ${otherStorage.name}")
         }
     }
 
     @Test
     fun updateFromPlain_twoStoragesWithUniqueEntries_firstStorageHasAllItsValuesAndValuesFromTheSecondStorage() {
-        Storages.values().forEach {
+        Storages.entries.forEach {
             val storage = Storages.PLAIN.get.also { it["UNIQUE_ENTRY_1"] = "unique-entry-1" }
             val otherStorage = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
             val expectedResult = storage.list() + otherStorage.list()
@@ -166,7 +150,7 @@ class CrossStorageTest {
 
     @Test
     fun updateFromToml_twoStoragesWithUniqueEntries_firstStorageHasAllItsValuesAndValuesFromTheSecondStorage() {
-        Storages.values().forEach {
+        Storages.entries.forEach {
             val storage = Storages.TOML.get.also { it["UNIQUE_ENTRY_1"] = "unique-entry-1" }
             val otherStorage = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
             val expectedResult = storage.list() + otherStorage.list()
@@ -179,7 +163,7 @@ class CrossStorageTest {
 
     @Test
     fun updateFromKeepass_twoStoragesWithUniqueEntries_firstStorageHasAllItsValuesAndValuesFromTheSecondStorage() {
-        Storages.values().forEach {
+        Storages.entries.forEach {
 
             val storage = Storages.KEEPASS.get.also { it["UNIQUE_ENTRY_1"] = "unique-entry-1" }
             val otherStorage = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
@@ -193,7 +177,7 @@ class CrossStorageTest {
 
     @Test
     fun updateFromSSM_twoStoragesWithUniqueEntries_firstStorageHasAllItsValuesAndValuesFromTheSecondStorage() {
-        Storages.values().forEach {
+        Storages.entries.forEach {
             val storage = Storages.SSM.get.also { it["UNIQUE_ENTRY_1"] = "unique-entry-1" }
             val otherStorage = it.get.also { it["UNIQUE_ENTRY_2"] = "unique-entry-2" }
             val expectedResult = storage.list() + otherStorage.list()

@@ -12,7 +12,7 @@ import java.util.UUID.randomUUID
 class PlainStorageTest {
     companion object {
         private val storage
-            get() = Plain("plain-test", "/tmp/parnas-plain/${randomUUID()}.properties").also {
+            get() = Plain("plain-test", TestUtils.tmpFilePath("parnas-plain/${randomUUID()}.properties")).also {
                 it.initialize()
                 it["FIRST_ENTRY"] = "first-entry"
                 it["SECOND_ENTRY"] = "second-entry"
@@ -20,21 +20,20 @@ class PlainStorageTest {
             }
 
         @JvmStatic
-        @BeforeAll
-        fun createTestDirectory() {
-            File("/tmp/parnas-plain").mkdir()
-        }
-
-        @JvmStatic
         @AfterAll
         fun cleanupTestStorage() {
-            FileUtils.deleteDirectory(File("/tmp/parnas-plain/"))
+            FileUtils.deleteDirectory(File(TestUtils.tmpFilePath("parnas-plain")))
         }
+    }
+
+    @AfterEach
+    fun test() {
+
     }
 
     @Test
     fun list_storageIsNotEmpty_gotNotEmptyList() {
-        Assertions.assertTrue(storage.list().size > 0)
+        Assertions.assertTrue(storage.list().isNotEmpty())
     }
 
     @Test
@@ -139,7 +138,7 @@ class PlainStorageTest {
         testStorage.permitDestroy = true
         testStorage.destroy()
 
-        Assertions.assertTrue(testStorage.list().size == 0)
+        Assertions.assertTrue(testStorage.list().isEmpty())
     }
 
     @Test

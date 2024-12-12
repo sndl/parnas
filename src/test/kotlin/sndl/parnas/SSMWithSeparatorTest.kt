@@ -1,33 +1,19 @@
 package sndl.parnas
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider
-import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.client.builder.AwsClientBuilder
-import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder
-import com.amazonaws.services.simplesystemsmanagement.model.GetParameterRequest
 import org.junit.ClassRule
 import org.junit.jupiter.api.*
 import sndl.parnas.storage.ConfigOption
 import sndl.parnas.storage.impl.SSM
 import sndl.parnas.utils.toLinkedSet
+import software.amazon.awssdk.services.ssm.model.GetParameterRequest
 import java.lang.IllegalArgumentException
 import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SSMWithSeparatorTest {
-    companion object {
-        private const val awsRegion = "eu-west-1"
-    }
-
     @ClassRule
     private val localstack = TestContainersFactory.getLocalstack()
-    private val ssmClient = AWSSimpleSystemsManagementClientBuilder.standard()
-            .withEndpointConfiguration(AwsClientBuilder
-                    .EndpointConfiguration(
-                            "http://${localstack.containerIpAddress}:${localstack.firstMappedPort}",
-                            awsRegion))
-            .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials("dummy", "dummy")))
-            .build()
+    private val ssmClient = TestUtils.buildClient(localstack)
     private val storage
         get() = SSM("ssm-test", ssmClient, "/${randomUUID()}/", "1111", ".").also {
             it["FIRST_ENTRY"] = "first-entry"
@@ -84,10 +70,11 @@ class SSMWithSeparatorTest {
 
         val expectedEntry = ConfigOption("ENTRY_PREFIX.FIFTH_ENTRY", "fifth-entry")
         val entry = ConfigOption("ENTRY_PREFIX.FIFTH_ENTRY",
-                ssmClient.getParameter(GetParameterRequest()
-                        .withName("${testStorage.prefix}ENTRY_PREFIX/FIFTH_ENTRY")
-                        .withWithDecryption(true)
-                ).parameter.value)
+                ssmClient.getParameter(GetParameterRequest.builder()
+                        .name("${testStorage.prefix}ENTRY_PREFIX/FIFTH_ENTRY")
+                        .withDecryption(true)
+                        .build()
+                ).parameter().value())
 
         Assertions.assertEquals(expectedEntry, entry)
     }

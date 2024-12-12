@@ -1,11 +1,11 @@
 package sndl.parnas.storage.impl.keepass
 
-import de.slackspace.openkeepass.exception.KeePassDatabaseUnreadableException
 import org.slf4j.LoggerFactory
 import sndl.parnas.storage.Storage
 import sndl.parnas.storage.ConfigOption
 import sndl.parnas.utils.*
 import java.io.File
+import java.io.IOException
 
 class KeePass(name: String, path: String, password: String) : Storage(name) {
     constructor(name: String, config: Map<String, String>) : this(
@@ -21,7 +21,7 @@ class KeePass(name: String, path: String, password: String) : Storage(name) {
     private val file = File(path)
     private val data = try {
         KeepassClient(file, password)
-    } catch (e: KeePassDatabaseUnreadableException) {
+    } catch (e: IOException) {
         logger.debug(e.message, e)
         throw WrongSecret("Incorrect password for KeePass storage ($name)")
     }
@@ -33,7 +33,7 @@ class KeePass(name: String, path: String, password: String) : Storage(name) {
         data.createDb()
     }
 
-    override fun list() = data.list().orEmpty().map { ConfigOption(it.title, it.password) }.toLinkedSet()
+    override fun list() = data.list().map { ConfigOption(it.title, it.password) }.toLinkedSet()
 
     override fun get(key: String) = data.findByTitle(key)?.let { ConfigOption(key, it.password) }
 

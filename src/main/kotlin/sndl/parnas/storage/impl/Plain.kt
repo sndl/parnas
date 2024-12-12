@@ -18,7 +18,19 @@ class Plain(name: String, private val path: String) : Storage(name) {
 
     init {
         if (file.exists()) {
-            data = Properties().apply { load(file.reader()) }
+            loadData()
+        }
+    }
+
+    private fun loadData() {
+        data = Properties().apply {
+            file.reader().use { reader -> load(reader) }
+        }
+    }
+
+    private fun storeData() {
+        file.outputStream().use {
+            stream -> data.store(stream, null)
         }
     }
 
@@ -28,7 +40,7 @@ class Plain(name: String, private val path: String) : Storage(name) {
         }
 
         file.createNewFile()
-        data = Properties().apply { load(file.reader()) }
+        loadData()
     }
 
     override fun list() = data.map { ConfigOption(it.key.toString(), it.value.toString()) }.toLinkedSet()
@@ -37,13 +49,13 @@ class Plain(name: String, private val path: String) : Storage(name) {
 
     override fun set(key: String, value: String): ConfigOption {
         data.setProperty(key, value)
-        data.store(file.outputStream(), null)
+        storeData()
 
         return ConfigOption(key, value)
     }
 
     override fun delete(key: String) {
         data.remove(key)
-        data.store(file.outputStream(), null)
+        storeData()
     }
 }
