@@ -12,7 +12,7 @@ import java.util.UUID.randomUUID
 class KeePassStorageTest {
     companion object {
         private val storage
-            get() = KeePass("keepass-test", "/tmp/parnas-keepass/${randomUUID()}.kdbx", "test1234").also {
+            get() = KeePass("keepass-test", TestUtils.tmpFilePath("parnas-keepass/${randomUUID()}.kdbx"), "test1234").also {
                 it.initialize()
                 it["FIRST_ENTRY"] = "first-entry"
                 it["SECOND_ENTRY"] = "second-entry"
@@ -34,7 +34,7 @@ class KeePassStorageTest {
 
     @Test
     fun list_storageIsNotEmpty_gotNotEmptyList() {
-        Assertions.assertTrue(storage.list().size > 0)
+        Assertions.assertTrue(storage.list().isNotEmpty())
     }
 
     @Test
@@ -139,7 +139,7 @@ class KeePassStorageTest {
         testStorage.permitDestroy = true
         testStorage.destroy()
 
-        Assertions.assertTrue(testStorage.list().size == 0)
+        Assertions.assertTrue(testStorage.list().isEmpty())
     }
 
     @Test

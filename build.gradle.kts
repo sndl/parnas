@@ -1,16 +1,17 @@
 import com.github.breadmoirai.githubreleaseplugin.GithubReleaseTask
 import com.github.jengelman.gradle.plugins.shadow.tasks.ShadowJar
-import org.jetbrains.kotlin.gradle.dsl.KotlinJvmCompile
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import tanvd.kosogor.proxy.shadowJar
 
 group = "sndl.parnas"
-version = "0.2.6"
+version = "0.2.7"
 description = "PARameter Naming And Storing"
 
 plugins {
-    id("tanvd.kosogor") version "1.0.14"
-    kotlin("jvm") version "1.6.21" apply true
-    id("io.gitlab.arturbosch.detekt") version "1.20.0"
+    id("tanvd.kosogor") version "1.0.22"
+    kotlin("jvm") version "2.0.21" apply true
+    id("io.gitlab.arturbosch.detekt") version "1.23.7"
     id("com.github.breadmoirai.github-release") version "2.3.7"
 }
 
@@ -19,15 +20,11 @@ repositories {
 }
 
 dependencies {
-    implementation("de.slackspace", "openkeepass", "0.8.2") {
-        exclude("org.simpleframework", "simple-xml")
-    }
-    implementation("com.carrotsearch.thirdparty", "simple-xml-safe", "2.7.1")
-    implementation("com.amazonaws", "aws-java-sdk-ssm", "1.12.779")
+    implementation("org.linguafranca.pwdb", "KeePassJava2-dom", "2.2.2")
+    implementation("software.amazon.awssdk", "ssm", "2.28.7")
     implementation("com.electronwill.night-config", "toml", "3.6.5")
     implementation("com.electronwill.night-config", "core", "3.6.5")
 
-    // TODO: update clikt to a major release 3.5.0
     implementation("com.github.ajalt.clikt", "clikt", "3.5.0")
     implementation("com.github.ajalt", "mordant", "1.2.1")
 
@@ -37,21 +34,31 @@ dependencies {
 
     testImplementation("org.junit.jupiter", "junit-jupiter-api", "5.8.2")
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", "5.8.2")
-    testImplementation("org.testcontainers", "testcontainers", "1.17.2")
+    testImplementation("org.testcontainers", "testcontainers", "1.20.3")
+    testImplementation("org.testcontainers", "localstack", "1.20.3")
 }
 
-tasks.withType<KotlinJvmCompile> {
-    kotlinOptions {
-        jvmTarget = "11"
-        languageVersion = "1.6"
-        apiVersion = "1.6"
+java {
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of("11"))
+    }
+}
+
+kotlin {
+    jvmToolchain(11)
+    compilerOptions {
+        jvmTarget.set(JvmTarget.JVM_11)
+        apiVersion.set(KotlinVersion.KOTLIN_2_0)
+        languageVersion.set(KotlinVersion.KOTLIN_2_0)
+        // https://jakewharton.com/kotlins-jdk-release-compatibility-flag/
+        // https://youtrack.jetbrains.com/issue/KT-49746/Support-Xjdk-release-in-gradle-toolchain#focus=Comments-27-8935065.0-0
+        freeCompilerArgs.addAll("-Xjdk-release=11")
     }
 }
 
 detekt {
     parallel = true
-    failFast = false
-    config = files(File(project.rootProject.projectDir, "buildScripts/detekt/detekt.yml"))
+    config.setFrom(files(File(project.rootProject.projectDir, "buildScripts/detekt/detekt.yml")))
     reports {
         xml {
             required.set(false)

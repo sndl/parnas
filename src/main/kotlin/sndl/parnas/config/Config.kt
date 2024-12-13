@@ -21,7 +21,7 @@ class Config(configFile: File) {
     fun getStoragesByTag(tag: String): LinkedHashSet<Storage> {
         return if (tag == "all") ini else {
             ini.filter {
-                tag in it.value["tags"]?.split(",")?.map { it.trim() } ?: emptyList()
+                tag in (it.value["tags"]?.split(",")?.map { it.trim() } ?: emptyList())
             }
         }.map { getStorage(it.key) }.toLinkedSet()
     }

@@ -1,9 +1,5 @@
 package sndl.parnas
 
-import com.amazonaws.auth.AWSStaticCredentialsProvider
-import com.amazonaws.auth.BasicAWSCredentials
-import com.amazonaws.client.builder.AwsClientBuilder
-import com.amazonaws.services.simplesystemsmanagement.AWSSimpleSystemsManagementClientBuilder
 import org.junit.ClassRule
 import org.junit.jupiter.api.*
 import sndl.parnas.storage.ConfigOption
@@ -14,19 +10,9 @@ import java.util.UUID.randomUUID
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class SSMTest {
-    companion object {
-        private const val awsRegion = "eu-west-1"
-    }
-
     @ClassRule
     private val localstack = TestContainersFactory.getLocalstack()
-    private val ssmClient = AWSSimpleSystemsManagementClientBuilder.standard()
-            .withEndpointConfiguration(AwsClientBuilder
-                    .EndpointConfiguration(
-                            "http://${localstack.containerIpAddress}:${localstack.firstMappedPort}",
-                            awsRegion))
-            .withCredentials(AWSStaticCredentialsProvider(BasicAWSCredentials("dummy", "dummy")))
-            .build()
+    private val ssmClient = TestUtils.buildClient(localstack)
     private val storage
         get() = SSM("ssm-test", ssmClient, "/${randomUUID()}/", "1111").also {
             it["FIRST_ENTRY"] = "first-entry"
@@ -36,7 +22,7 @@ class SSMTest {
 
     @Test
     fun list_storageIsNotEmpty_gotNotEmptyList() {
-        Assertions.assertTrue(storage.list().size > 0)
+        Assertions.assertTrue(storage.list().isNotEmpty())
     }
 
     @Test
@@ -160,7 +146,7 @@ class SSMTest {
 
         val expectedResult = storage1BeforeUpdateList + storage2.list()
 
-        Assertions.assertTrue(storage1.list() == expectedResult)
+        Assertions.assertEquals(expectedResult, storage1.list())
     }
 
     @Test
