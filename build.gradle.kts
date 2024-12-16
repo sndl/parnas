@@ -40,19 +40,19 @@ dependencies {
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of("11"))
+        languageVersion.set(JavaLanguageVersion.of("17"))
     }
 }
 
 kotlin {
-    jvmToolchain(11)
+    jvmToolchain(17)
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_11)
+        jvmTarget.set(JvmTarget.JVM_17)
         apiVersion.set(KotlinVersion.KOTLIN_2_0)
         languageVersion.set(KotlinVersion.KOTLIN_2_0)
         // https://jakewharton.com/kotlins-jdk-release-compatibility-flag/
         // https://youtrack.jetbrains.com/issue/KT-49746/Support-Xjdk-release-in-gradle-toolchain#focus=Comments-27-8935065.0-0
-        freeCompilerArgs.addAll("-Xjdk-release=11")
+        freeCompilerArgs.addAll("-Xjdk-release=17")
     }
 }
 
