@@ -5,7 +5,7 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import tanvd.kosogor.proxy.shadowJar
 
 group = "sndl.parnas"
-version = "0.2.7"
+version = "0.2.8"
 description = "PARameter Naming And Storing"
 
 plugins {
@@ -20,7 +20,7 @@ repositories {
 }
 
 dependencies {
-    implementation("org.linguafranca.pwdb", "KeePassJava2-dom", "2.2.2")
+    implementation("org.linguafranca.pwdb", "KeePassJava2-jackson", "2.2.3")
     implementation("software.amazon.awssdk", "ssm", "2.28.7")
     implementation("com.electronwill.night-config", "toml", "3.6.5")
     implementation("com.electronwill.night-config", "core", "3.6.5")
