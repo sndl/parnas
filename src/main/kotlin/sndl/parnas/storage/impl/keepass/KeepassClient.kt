@@ -1,9 +1,9 @@
 package sndl.parnas.storage.impl.keepass
 
 import org.linguafranca.pwdb.kdbx.KdbxCreds
-import org.linguafranca.pwdb.kdbx.dom.DomDatabaseWrapper
-import org.linguafranca.pwdb.kdbx.dom.DomEntryWrapper
-import org.linguafranca.pwdb.kdbx.dom.DomGroupWrapper
+import org.linguafranca.pwdb.kdbx.jackson.JacksonDatabase
+import org.linguafranca.pwdb.kdbx.jackson.JacksonEntry
+import org.linguafranca.pwdb.kdbx.jackson.JacksonGroup
 import java.io.File
 
 class KeepassClient(private val databaseFile: File, private val masterPassword: String) {
@@ -11,11 +11,11 @@ class KeepassClient(private val databaseFile: File, private val masterPassword: 
         private const val ROOT_GROUP_NAME = "Root"
     }
 
-    private lateinit var database: DomDatabaseWrapper
+    private lateinit var database: JacksonDatabase
 
     init {
         val credentials = KdbxCreds(masterPassword.toByteArray())
-        if (databaseFile.exists()) database = DomDatabaseWrapper.load(credentials, databaseFile.inputStream())
+        if (databaseFile.exists()) database = JacksonDatabase.load(credentials, databaseFile.inputStream())
     }
 
     data class KeepassEntry(val title: String, val password: String)
@@ -24,13 +24,13 @@ class KeepassClient(private val databaseFile: File, private val masterPassword: 
         database.save(KdbxCreds(masterPassword.toByteArray()), databaseFile.outputStream())
     }
 
-    private fun findEntryByTitle(title: String): DomEntryWrapper? {
+    private fun findEntryByTitle(title: String): JacksonEntry? {
         return database.findEntries { it.title == title }.firstOrNull()
     }
 
-    fun createDb(): DomDatabaseWrapper {
+    fun createDb(): JacksonDatabase {
         databaseFile.createNewFile()
-        database = DomDatabaseWrapper().also {
+        database = JacksonDatabase().also {
             it.newGroup(ROOT_GROUP_NAME)
         }
         saveDB()
@@ -60,7 +60,7 @@ class KeepassClient(private val databaseFile: File, private val masterPassword: 
         }
     }
 
-    private fun updateDb(body: DomGroupWrapper.() -> Unit) {
+    private fun updateDb(body: JacksonGroup.() -> Unit) {
         database.rootGroup.body()
         saveDB()
     }

@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.8
+* Migration from KeePassJava2-dom to KeePassJava2-jackson implementation
+
 ## 0.2.7
 * Dependency updates: Gradle 8.11.1, Kotlin 2.0.21, testcontainers with localstack 1.20.3/3.0.0
 * Migration from an outdated openkeepass library to KeePassJava
