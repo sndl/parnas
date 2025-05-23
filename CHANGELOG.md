@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.2.9
+* Improved KeePass implementation with better error handling
+* Fixed parent directory creation for KeePass databases
+* Added comprehensive test coverage for KeePass special characters, long values, and error cases
+* Updated KeePassJava2-jackson dependency to 2.2.4
+* Updated clikt dependency to 3.5.4
+
 ## 0.2.8
 * Migration from KeePassJava2-dom to KeePassJava2-jackson implementation
 

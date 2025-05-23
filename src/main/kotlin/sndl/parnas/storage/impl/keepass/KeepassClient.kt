@@ -15,13 +15,19 @@ class KeepassClient(private val databaseFile: File, private val masterPassword: 
 
     init {
         val credentials = KdbxCreds(masterPassword.toByteArray())
-        if (databaseFile.exists()) database = JacksonDatabase.load(credentials, databaseFile.inputStream())
+        if (databaseFile.exists()) {
+            databaseFile.inputStream().use { inputStream ->
+                database = JacksonDatabase.load(credentials, inputStream)
+            }
+        }
     }
 
     data class KeepassEntry(val title: String, val password: String)
 
     private fun saveDB() {
-        database.save(KdbxCreds(masterPassword.toByteArray()), databaseFile.outputStream())
+        databaseFile.outputStream().use { outputStream ->
+            database.save(KdbxCreds(masterPassword.toByteArray()), outputStream)
+        }
     }
 
     private fun findEntryByTitle(title: String): JacksonEntry? {
