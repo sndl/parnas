@@ -139,7 +139,7 @@ class TomlStorageTest {
         )
 
         testStorage.delete("FIRST_ENTRY", "SECOND_ENTRY")
-        Assertions.assertEquals(testStorage.list(), expectedList)
+        Assertions.assertEquals(expectedList, testStorage.list())
     }
 
     @Test

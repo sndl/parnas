@@ -15,21 +15,28 @@ class KeePass(name: String, path: String, password: String) : Storage(name) {
     )
 
     companion object {
-        private val logger = LoggerFactory.getLogger(KeepassClient::class.java)
+        private val logger = LoggerFactory.getLogger(KeePass::class.java)
     }
 
     private val file = File(path)
     private val data = try {
         KeepassClient(file, password)
-    } catch (e: IOException) {
-        logger.debug(e.message, e)
-        throw WrongSecret("Incorrect password for KeePass storage ($name)")
+    } catch (e: Exception) {
+        when (e) {
+            is IllegalStateException, is IOException -> {
+                logger.debug("Failed to initialize KeePass client: ${e.message}", e)
+                throw WrongSecret("Incorrect password for KeePass storage ($name)")
+            }
+
+            else -> throw e
+        }
     }
 
     override val isInitialized: Boolean
         get() = file.exists()
 
     override fun initialize() {
+        file.parentFile?.mkdirs()
         data.createDb()
     }
 
