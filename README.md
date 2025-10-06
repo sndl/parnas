@@ -27,6 +27,13 @@ chmod +x install.sh && ./install.sh && rm ./install.sh
 
 To finalize installation restart your terminal, and you should be able to use `parnas` from the command line.
 
+## Update
+
+To check for newer versions and update:
+```
+parnas check-updates
+```
+
 ## Configuration
 
 Parnas configuration is stored in an INI file `parnas.conf`, which default location is assumed to be the current working
