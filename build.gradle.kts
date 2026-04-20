@@ -5,13 +5,13 @@ import org.jetbrains.kotlin.gradle.dsl.KotlinVersion
 import tanvd.kosogor.proxy.shadowJar
 
 group = "sndl.parnas"
-version = "0.2.9"
+version = "0.2.10-SNAPSHOT"
 description = "PARameter Naming And Storing"
 
 plugins {
-    id("tanvd.kosogor") version "1.0.22"
-    kotlin("jvm") version "2.0.21" apply true
-    id("io.gitlab.arturbosch.detekt") version "1.23.7"
+    id("tanvd.kosogor") version "1.0.23"
+    kotlin("jvm") version "2.3.20" apply true
+    id("io.gitlab.arturbosch.detekt") version "1.23.8"
     id("com.github.breadmoirai.github-release") version "2.3.7"
 }
 
@@ -21,38 +21,43 @@ repositories {
 
 dependencies {
     implementation("org.linguafranca.pwdb", "KeePassJava2-jackson", "2.2.4")
-    implementation("software.amazon.awssdk", "ssm", "2.28.7")
-    implementation("com.electronwill.night-config", "toml", "3.6.5")
-    implementation("com.electronwill.night-config", "core", "3.6.5")
+    implementation("software.amazon.awssdk", "ssm", "2.42.36")
+    implementation("com.electronwill.night-config", "toml", "3.8.4")
+    implementation("com.electronwill.night-config", "core", "3.8.4")
 
     implementation("com.github.ajalt.clikt", "clikt", "3.5.4")
     implementation("com.github.ajalt", "mordant", "1.2.1")
 
     implementation("org.ini4j", "ini4j", "0.5.4")
-    implementation("org.apache.logging.log4j", "log4j-core", "2.17.1")
-    implementation("org.apache.logging.log4j", "log4j-slf4j-impl", "2.17.1")
+    implementation("org.apache.logging.log4j", "log4j-core", "2.25.4")
+    implementation("org.apache.logging.log4j", "log4j-slf4j-impl", "2.25.4")
 
-    testImplementation("org.junit.jupiter", "junit-jupiter-api", "5.8.2")
-    testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", "5.8.2")
-    testImplementation("org.testcontainers", "testcontainers", "1.20.3")
-    testImplementation("org.testcontainers", "localstack", "1.20.3")
+    testImplementation("org.junit.jupiter", "junit-jupiter-api", "5.14.3")
+    testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", "5.14.3")
+    testRuntimeOnly("org.junit.platform", "junit-platform-launcher", "1.14.3")
+    testImplementation("org.testcontainers", "testcontainers", "1.21.4")
+    testImplementation("org.testcontainers", "localstack", "1.21.4")
 }
 
 java {
     toolchain {
-        languageVersion.set(JavaLanguageVersion.of("17"))
+        languageVersion.set(JavaLanguageVersion.of("25"))
+        vendor.set(JvmVendorSpec.AMAZON)
     }
 }
 
 kotlin {
-    jvmToolchain(17)
+    jvmToolchain {
+        languageVersion.set(JavaLanguageVersion.of(25))
+        vendor.set(JvmVendorSpec.AMAZON)
+    }
     compilerOptions {
-        jvmTarget.set(JvmTarget.JVM_17)
-        apiVersion.set(KotlinVersion.KOTLIN_2_0)
-        languageVersion.set(KotlinVersion.KOTLIN_2_0)
+        jvmTarget.set(JvmTarget.JVM_25)
+        apiVersion.set(KotlinVersion.KOTLIN_2_3)
+        languageVersion.set(KotlinVersion.KOTLIN_2_3)
         // https://jakewharton.com/kotlins-jdk-release-compatibility-flag/
         // https://youtrack.jetbrains.com/issue/KT-49746/Support-Xjdk-release-in-gradle-toolchain#focus=Comments-27-8935065.0-0
-        freeCompilerArgs.addAll("-Xjdk-release=17")
+        freeCompilerArgs.addAll("-Xjdk-release=25")
     }
 }
 
@@ -103,6 +108,10 @@ tasks.withType(GithubReleaseTask::class) {
 
 tasks.withType<Test> {
     useJUnitPlatform()
+
+    // Force testcontainers to use IPv4 loopback — on macOS, `localhost` may resolve to ::1 (IPv6)
+    // but Docker Desktop only binds mapped ports on 127.0.0.1 (IPv4), causing NoRouteToHostException.
+    environment("TESTCONTAINERS_HOST_OVERRIDE", "127.0.0.1")
 
     testLogging {
         events("passed", "skipped", "failed")

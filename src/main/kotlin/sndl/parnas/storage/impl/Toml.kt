@@ -1,6 +1,5 @@
 package sndl.parnas.storage.impl
 
-import com.electronwill.nightconfig.core.AbstractConfig
 import com.electronwill.nightconfig.core.Config
 import com.electronwill.nightconfig.core.file.FileConfig
 import sndl.parnas.storage.Storage
@@ -31,7 +30,7 @@ class Toml(name: String, private val path: String) : Storage(name) {
             val key = prefix?.let { "$prefix.${entry.key}" } ?: entry.key
             val value = entry.getValue<Any>()
 
-            if (value is AbstractConfig) {
+            if (value is Config) {
                 // TOML file is not expected to be deeply nested, therefore recursion should do just fine
                 addAll(nestedList(HashSet(value.entrySet()), key))
             } else {
