@@ -29,7 +29,6 @@ dependencies {
     implementation("com.github.ajalt.clikt", "clikt", "3.5.4")
     implementation("com.github.ajalt", "mordant", "1.2.1")
 
-    implementation("org.ini4j", "ini4j", "0.5.4")
     implementation("org.apache.logging.log4j", "log4j-core", "2.25.4")
     implementation("org.apache.logging.log4j", "log4j-slf4j-impl", "2.25.4")
 
