@@ -74,6 +74,11 @@ detekt {
     }
 }
 
+// Detekt 1.23.x supports --jvm-target up to 22; cap it so it doesn't inherit JVM_25 from the toolchain.
+tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
+    jvmTarget = "22"
+}
+
 val shadowJar = shadowJar {
     jar {
         mainClass = "sndl.parnas.MainKt"
