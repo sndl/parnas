@@ -5,6 +5,7 @@ import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.io.TempDir
 import sndl.parnas.config.Config
+import sndl.parnas.config.IniFile
 import sndl.parnas.storage.impl.Plain
 import sndl.parnas.storage.impl.Toml
 import sndl.parnas.utils.ConfigurationException
@@ -187,6 +188,31 @@ class ConfigTest {
             extra = a=b
         """)
         assertInstanceOf(Plain::class.java, config.getStorage(name))
+    }
+
+    @Test
+    fun parse_sectionWithInlineComment_sectionNameParsedCorrectly() {
+        val name = uid()
+        val config = conf("""
+            [$name] ; this is a comment
+            type = plain
+            path = ${tempDir.resolve("$name.properties")}
+        """)
+        assertInstanceOf(Plain::class.java, config.getStorage(name))
+    }
+
+    @Test
+    fun parse_malformedSectionHeader_throwsConfigurationException() {
+        assertThrows<ConfigurationException> {
+            IniFile.parse(File(tempDir, "${uid()}.conf").also { it.writeText("[unclosed\ntype = plain") })
+        }
+    }
+
+    @Test
+    fun parse_keyValueBeforeAnySection_throwsConfigurationException() {
+        assertThrows<ConfigurationException> {
+            IniFile.parse(File(tempDir, "${uid()}.conf").also { it.writeText("orphan = value\n[section]\ntype = plain") })
+        }
     }
 
     @Test

@@ -9,10 +9,7 @@ import java.io.File
 
 class Config(configFile: File) {
     private val ini = IniFile.parse(configFile)
-
-    companion object {
-        private val storages = HashMap<String, Storage>()
-    }
+    private val storages = HashMap<String, Storage>()
 
     fun getStorage(name: String) = storages.getOrPut(name) { initStorage(name) }
 
