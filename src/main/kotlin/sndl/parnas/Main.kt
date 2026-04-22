@@ -6,8 +6,14 @@ import org.apache.logging.log4j.Level
 import org.apache.logging.log4j.core.config.Configurator
 import org.apache.logging.log4j.core.config.builder.api.ConfigurationBuilderFactory
 import sndl.parnas.cli.*
+import sndl.parnas.cli.installSkill
 
 fun main(args: Array<String>) {
+    if (args.isNotEmpty() && args[0] == "install-skill") {
+        installSkill()
+        return
+    }
+
     fun prepareLogging() {
         val builder = ConfigurationBuilderFactory.newConfigurationBuilder()
         val layout = builder.newLayout("PatternLayout").apply {

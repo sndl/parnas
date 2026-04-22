@@ -27,6 +27,19 @@ chmod +x install.sh && ./install.sh && rm ./install.sh
 
 To finalize installation restart your terminal, and you should be able to use `parnas` from the command line.
 
+## Claude Code Integration
+
+Parnas includes a [Claude Code](https://claude.ai/code) skill that teaches Claude how to use the CLI — commands, storage backends, guardrails for destructive operations, and common workflows.
+
+To install the skill globally on your machine:
+```
+parnas install-skill
+```
+
+This writes the skill to `~/.claude/skills/parnas/SKILL.md`, making it available across all your projects.
+
+The skill is also included in this repository under `.claude/skills/parnas/SKILL.md` and is automatically available to anyone working in this project.
+
 ## Update
 
 To check for newer versions and update:

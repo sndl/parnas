@@ -79,12 +79,28 @@ tasks.withType<io.gitlab.arturbosch.detekt.Detekt>().configureEach {
     jvmTarget = "22"
 }
 
+val copySkill = tasks.register("copySkill") {
+    val src = file(".claude/skills/parnas/SKILL.md")
+    val dest = file("src/main/resources/skill.md")
+    inputs.file(src)
+    outputs.file(dest)
+    doLast {
+        dest.parentFile.mkdirs()
+        src.copyTo(dest, overwrite = true)
+    }
+}
+
+tasks.named("processResources") {
+    dependsOn(copySkill)
+}
+
 val shadowJar = shadowJar {
     jar {
         mainClass = "sndl.parnas.MainKt"
     }
 }.apply {
     task.archiveClassifier.set("")
+    task.dependsOn(copySkill)
 
     task.from(File("src/main/resources/version.txt").apply {
         if (!exists()) {
