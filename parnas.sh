@@ -69,6 +69,30 @@ check_for_updates () {
     fi
 }
 
+install_version () {
+    local version=$1
+    local jar_name=${PARNAS_HOME}/${APP_NAME}.jar
+
+    if [[ -z ${version} ]]; then
+        echo "Usage: parnas install-version <version>"
+        echo "Example: parnas install-version v0.2.10"
+        exit 1
+    fi
+
+    [[ ${version} != v* ]] && version="v${version}"
+
+    local download_url="https://github.com/sndl/parnas/releases/download/${version}/parnas-${version#v}.jar"
+
+    echo "Installing ${APP_NAME} ${version}..."
+    if curl -f -L -s -o ${jar_name} ${download_url}; then
+        echo ${version} > ${PARNAS_HOME}/version
+        echo "Installed ${APP_NAME} ${version}"
+    else
+        echo "ERROR: Failed to download ${APP_NAME} ${version}. Check that the version exists."
+        exit 1
+    fi
+}
+
 execute () {
     java -jar ${PARNAS_HOME}/${APP_NAME}.jar "$@"
 }
@@ -76,6 +100,12 @@ execute () {
 main () {
     check_prerequisites
     check_config
+
+    if [[ ${FIRST_ARG} == "install-version" ]]; then
+        install_version "$2"
+        exit 0
+    fi
+
     check_for_updates
     execute "$@"
 }

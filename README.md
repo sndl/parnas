@@ -47,6 +47,11 @@ To check for newer versions and update:
 parnas check-updates
 ```
 
+To install a specific version:
+```
+parnas install-version v0.2.10
+```
+
 ## Configuration
 
 Parnas configuration is stored in an INI file `parnas.conf`, which default location is assumed to be the current working
