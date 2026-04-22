@@ -4,8 +4,7 @@ import sndl.parnas.storage.Storage
 import sndl.parnas.storage.ConfigOption
 import sndl.parnas.utils.*
 import software.amazon.awssdk.auth.credentials.AwsCredentialsProviderChain
-import software.amazon.awssdk.auth.credentials.EnvironmentVariableCredentialsProvider
-import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvider
+import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider
 import software.amazon.awssdk.auth.credentials.ProfileCredentialsProvider
 import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.regions.providers.DefaultAwsRegionProviderChain
@@ -31,11 +30,13 @@ class SSM(name: String, ssmClient: SsmClient,
                     ssmClient = SsmClient.builder()
                             .region(region?.let { Region.of(it)} ?: DefaultAwsRegionProviderChain().region)
                             .credentialsProvider(
-                                AwsCredentialsProviderChain.of(
-                                    EnvironmentVariableCredentialsProvider.create(),
-                                    profileName?.let { ProfileCredentialsProvider.create(it) },
-                                    InstanceProfileCredentialsProvider.create()
-                                )
+                                if (profileName != null)
+                                    AwsCredentialsProviderChain.of(
+                                        ProfileCredentialsProvider.create(profileName),
+                                        DefaultCredentialsProvider.create()
+                                    )
+                                else
+                                    DefaultCredentialsProvider.create()
                             ).build(),
                     prefix = prefix,
                     kmsKeyId = keyId,
