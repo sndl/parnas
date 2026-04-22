@@ -17,11 +17,15 @@ fun main(args: Array<String>) {
             it.add(layout)
             builder.add(it)
         }
-        val rootLogger = builder.newRootLogger(Level.INFO).also {
+        builder.newRootLogger(Level.INFO).also {
             it.add(builder.newAppenderRef(console.name))
             builder.add(it)
         }
-
+        builder.newLogger("software.amazon.awssdk", Level.WARN).also {
+            it.addAttribute("additivity", false)
+            it.add(builder.newAppenderRef(console.name))
+            builder.add(it)
+        }
         Configurator.initialize(builder.build())
     }
 

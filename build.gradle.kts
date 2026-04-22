@@ -30,7 +30,7 @@ dependencies {
     implementation("com.github.ajalt", "mordant", "1.2.1")
 
     implementation("org.apache.logging.log4j", "log4j-core", "2.25.4")
-    implementation("org.apache.logging.log4j", "log4j-slf4j-impl", "2.25.4")
+    implementation("org.apache.logging.log4j", "log4j-slf4j2-impl", "2.25.4")
 
     testImplementation("org.junit.jupiter", "junit-jupiter-api", "5.14.3")
     testRuntimeOnly("org.junit.jupiter", "junit-jupiter-engine", "5.14.3")
