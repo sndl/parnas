@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.10
+* Added Claude Code skill for Parnas CLI (`parnas install-skill` to install globally)
+* Targeted Java runtime updated to 25, dependencies updated to address CVEs
+* Fixed excess logging from AWS SDK
+* CI: allow overwrite for snapshot versions
+
 ## 0.2.9
 * Improved KeePass implementation with better error handling
 * Fixed parent directory creation for KeePass databases

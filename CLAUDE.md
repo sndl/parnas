@@ -6,7 +6,7 @@
 
 ## Tech Stack
 
-- **Language**: Kotlin 2.0, JVM 17
+- **Language**: Kotlin 2.0, JVM 25
 - **Build**: Gradle with `build.gradle.kts`
 - **Packaging**: Shadow JAR via `tanvd.kosogor`
 - **Linting**: Detekt (`buildScripts/detekt/detekt.yml`)
