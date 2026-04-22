@@ -100,7 +100,10 @@ githubRelease {
     token(System.getenv("GITHUB_TOKEN"))
     owner("sndl")
     targetCommitish("master")
-    prerelease.set(version.toString().contains("SNAPSHOT"))
+    version.toString().contains("SNAPSHOT").let {
+        prerelease.set(it)
+        overwrite.set(it)
+    }
     releaseAssets(shadowJar.task.archiveFile.get())
 }
 
