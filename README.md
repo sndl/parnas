@@ -17,7 +17,7 @@
 ## Installation
 
 Getting **Parnas** up and running is easy: download and run a wrapper script that will check your environment and install the latest suitable **Parnas** version.
-Wrapper script requires `java`, `curl`, `jq`, and `grep`.
+Wrapper script requires `java` and `curl`.
 
 Commands to install:
 ```
