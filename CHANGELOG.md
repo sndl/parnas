@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.2.11
+* Add option to install specific version to parnas.sh
+* Update AWS credentials provider chain to fallback to the default chain and add STS dependency to make IRSA work
+* Update parnas.sh to use http requests instead of API to check the latest version
+
 ## 0.2.10
 * Added Claude Code skill for Parnas CLI (`parnas install-skill` to install globally)
 * Targeted Java runtime updated to 25, dependencies updated to address CVEs
