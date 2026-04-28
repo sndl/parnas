@@ -24,6 +24,7 @@ dependencies {
     implementation("org.linguafranca.pwdb", "KeePassJava2-jackson", "2.2.4")
     implementation("software.amazon.awssdk", "ssm", "2.42.37")
     implementation("software.amazon.awssdk", "sts", "2.42.37")
+    implementation("software.amazon.awssdk", "signin", "2.42.37")
     implementation("com.electronwill.night-config", "toml", "3.8.4")
     implementation("com.electronwill.night-config", "core", "3.8.4")
 
