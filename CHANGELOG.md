@@ -1,5 +1,8 @@
 # Changelog
 
+## 0.2.12
+* Add AWS SDK `signin` module to support `aws login` (IAM Identity Center simplified access) credential flow
+
 ## 0.2.11
 * Add option to install specific version to parnas.sh
 * Update AWS credentials provider chain to fallback to the default chain and add STS dependency to make IRSA work
